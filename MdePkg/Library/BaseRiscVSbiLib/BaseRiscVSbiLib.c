@@ -31,7 +31,6 @@
   @retval  Returns SBI_RET structure with value and error code.
 
 **/
-STATIC
 SBI_RET
 EFIAPI
 SbiCall (
@@ -88,7 +87,6 @@ SbiCall (
   @param[in] SbiError   SBI error code
   @retval EFI_STATUS
 **/
-STATIC
 EFI_STATUS
 EFIAPI
 TranslateError (
