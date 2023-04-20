@@ -34,6 +34,11 @@
   ##                 AArch64 and ARM.
   StandaloneMmCoreEntryPoint|Include/Library/Arm/StandaloneMmCoreEntryPoint.h
 
+[LibraryClasses.RISCV64]
+  ##  @libraryclass  Defines a set of interfaces for the MM core entrypoint for
+  ##                 RISCV64.
+  StandaloneMmCoreEntryPoint|Include/Library/RiscV/StandaloneMmCoreEntryPoint.h
+
 [Guids]
   gStandaloneMmPkgTokenSpaceGuid           = { 0x18fe7632, 0xf5c8, 0x4e63, { 0x8d, 0xe8, 0x17, 0xa5, 0x5c, 0x59, 0x13, 0xbd }}
   gMpInformationHobGuid                    = { 0xba33f15d, 0x4000, 0x45c1, { 0x8e, 0x88, 0xf9, 0x16, 0x92, 0xd4, 0x57, 0xe3 }}
@@ -47,4 +52,9 @@
 
   gEfiStandaloneMmNonSecureBufferGuid      = { 0xf00497e3, 0xbfa2, 0x41a1, { 0x9d, 0x29, 0x54, 0xc2, 0xe9, 0x37, 0x21, 0xc5 }}
   gEfiMmCpuDriverEpDescriptorGuid          = { 0x6ecbd5a1, 0xc0f8, 0x4702, { 0x83, 0x01, 0x4f, 0xc2, 0xc5, 0x47, 0x0a, 0x51 }}
+
+[PcdsFixedAtBuild]
+  # The RiscV Standalone MM FV offset and size
+  gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFvBase|0|UINT64|0x0
+  gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFvSize|0|UINT32|0x1
 

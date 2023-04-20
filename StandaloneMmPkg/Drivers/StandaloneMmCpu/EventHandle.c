@@ -20,8 +20,10 @@
 #include <Guid/ZeroGuid.h>
 #include <Guid/MmramMemoryReserve.h>
 
-#include <IndustryStandard/ArmFfaSvc.h>
-#include <IndustryStandard/ArmStdSmc.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <IndustryStandard/ArmFfaSvc.h>
+  #include <IndustryStandard/ArmStdSmc.h>
+#endif
 
 #include <Library/StandaloneMmCpu.h>
 
