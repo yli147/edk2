@@ -228,3 +228,26 @@ SetFirmwareContextPointer (
 {
   SetFirmwareContext (FirmwareContextPtr);
 }
+
+/**
+  Send the MM data through OpenSBI FW SMC Extension SBI.
+
+  @param    MmContextPtr   Pointer to MM Context.
+  @retval   EFI_SUCCESS    Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiCallSmcMm (
+  IN  EFI_RISCV_MM_CONTEXT  *MmContextPtr
+ )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_SMC,
+          MmContextPtr->FuncId,
+          2,
+          MmContextPtr->Cookie,
+          MmContextPtr->PayloadAddress
+          );
+  return TranslateError (Ret.Error);
+}
