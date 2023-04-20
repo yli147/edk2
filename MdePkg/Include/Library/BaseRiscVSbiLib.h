@@ -25,6 +25,7 @@
 #define SBI_EXT_DBCN                 0x4442434E
 #define SBI_EXT_TIME                 0x54494D45
 #define SBI_EXT_SRST                 0x53525354
+#define SBI_EXT_SMC                  0x48923468
 
 /* SBI function IDs for base extension */
 #define SBI_EXT_BASE_SPEC_VERSION   0x0
@@ -40,6 +41,7 @@
 #define SBI_EXT_DBCN_READ        0x1
 #define SBI_EXT_DBCN_WRITE_BYTE  0x2
 
+
 /* SBI function IDs for TIME extension */
 #define SBI_EXT_TIME_SET_TIMER  0x0
 
@@ -52,6 +54,11 @@
 
 #define SBI_SRST_RESET_REASON_NONE     0x0
 #define SBI_SRST_RESET_REASON_SYSFAIL  0x1
+
+/* SBI function IDs for SMC extension */
+#define SBI_SMC_MM_VERSION             0x80
+#define SBI_SMC_MM_COMMUNICATE         0x81
+#define SBI_SMC_MM_COMPLETE_EVT        0x82
 
 /* SBI return error codes */
 #define SBI_SUCCESS                0
@@ -72,6 +79,12 @@ typedef struct {
   VOID      *PrePiHobList;       // Pre PI Hob List
   UINT64    FlattenedDeviceTree; // Pointer to Flattened Device tree
 } EFI_RISCV_FIRMWARE_CONTEXT;
+
+typedef struct {
+  UINT64    FuncId;              // MM Func ID
+  UINT64    Cookie;              // MM Cookie
+  UINT64    PayloadAddress;      // MM Payload Address
+} EFI_RISCV_MM_CONTEXT;
 
 //
 // EDK2 OpenSBI firmware extension return status.
@@ -184,5 +197,17 @@ RiscVSbiEcall (
   IN UINTN      Fid,
   IN UINTN      Ext
   );
+
+/**
+  Send the MM data through OpenSBI FW SMC Extension SBI.
+
+  @param    MmContextPtr   Pointer to MM Context.
+  @retval   EFI_SUCCESS    Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiCallSmcMm (
+  IN  EFI_RISCV_MM_CONTEXT  *MmContextPtr
+ );
 
 #endif
