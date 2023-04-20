@@ -229,3 +229,26 @@ SetFirmwareContextPointer (
 {
   SetFirmwareContext (FirmwareContextPtr);
 }
+
+/**
+  Send the SMM data through OpenSBI FW Confidential Extension SBI.
+
+  @param    SmmContextPtr   Pointer to SMM Context.
+  @retval   EFI_SUCCESS     Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiCallCoVESmm (
+  IN  EFI_RISCV_SMM_CONTEXT  *SmmContextPtr
+ )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_COVE,
+          SmmContextPtr->FuncId,
+          2,
+          SmmContextPtr->Cookie,
+          SmmContextPtr->PayloadAddress
+          );
+  return TranslateError (Ret.Error);
+}

@@ -20,6 +20,7 @@
 /* SBI Extension IDs */
 #define SBI_EXT_TIME  0x54494D45
 #define SBI_EXT_SRST  0x53525354
+#define SBI_EXT_COVE  0x434F5648
 
 /* SBI function IDs for TIME extension*/
 #define SBI_EXT_TIME_SET_TIMER  0x0
@@ -33,6 +34,11 @@
 
 #define SBI_SRST_RESET_REASON_NONE     0x0
 #define SBI_SRST_RESET_REASON_SYSFAIL  0x1
+
+/* SBI function IDs for COVE extension */
+#define SBI_COVE_SMM_VERSION		0x80
+#define SBI_COVE_SMM_COMMUNICATE	0x81
+
 
 /* SBI return error codes */
 #define SBI_SUCCESS                0
@@ -53,6 +59,12 @@ typedef struct {
   VOID      *PrePiHobList;       // Pre PI Hob List
   UINT64    FlattenedDeviceTree; // Pointer to Flattened Device tree
 } EFI_RISCV_FIRMWARE_CONTEXT;
+
+typedef struct {
+  UINT64    FuncId;              // SMM Func ID
+  UINT64    Cookie;              // SMM Cookie
+  UINT64    PayloadAddress;      // SMM Payload Address
+} EFI_RISCV_SMM_CONTEXT;
 
 //
 // EDK2 OpenSBI firmware extension return status.
@@ -150,5 +162,17 @@ RiscVSbiEcall (
   IN UINTN      Fid,
   IN UINTN      Ext
   );
+
+/**
+  Send the SMM data through OpenSBI FW Confidential Extension SBI.
+
+  @param    SmmContextPtr   Pointer to SMM Context.
+  @retval   EFI_SUCCESS        Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiCallCoVESmm (
+  IN  EFI_RISCV_SMM_CONTEXT  *SmmContextPtr
+ );
 
 #endif
