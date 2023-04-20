@@ -14,15 +14,23 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/MpInformation.h>
 
 #include <Library/Arm/StandaloneMmCoreEntryPoint.h>
-#include <Library/ArmMmuLib.h>
-#include <Library/ArmSvcLib.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <Library/ArmMmuLib.h>
+  #include <Library/ArmSvcLib.h>
+#elif defined (MDE_CPU_RISCV64)
+  #include <Library/BaseRiscVSbiLib.h>
+#else
+  #error Unsupported Processor Type
+#endif
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/SerialPortLib.h>
 
-#include <IndustryStandard/ArmStdSmc.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <IndustryStandard/ArmStdSmc.h>
+#endif
 
 extern EFI_HOB_HANDOFF_INFO_TABLE *
 HobConstructor (
@@ -119,10 +127,16 @@ CreateHobListFromBootInfo (
 
   for (Index = 0; Index < PayloadBootInfo->NumCpus; Index++) {
     ProcInfoBuffer[Index].ProcessorId      = CpuInfo[Index].Mpidr;
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
     ProcInfoBuffer[Index].Location.Package = GET_CLUSTER_ID (CpuInfo[Index].Mpidr);
     ProcInfoBuffer[Index].Location.Core    = GET_CORE_ID (CpuInfo[Index].Mpidr);
     ProcInfoBuffer[Index].Location.Thread  = GET_CORE_ID (CpuInfo[Index].Mpidr);
-
+#elif defined MDE_CPU_RISCV64
+    // Cluster definition is not supported on RISC-V
+    ProcInfoBuffer[Index].Location.Package = 0;
+    ProcInfoBuffer[Index].Location.Core    = CpuInfo[Index].Mpidr;
+    ProcInfoBuffer[Index].Location.Thread  = CpuInfo[Index].Mpidr;
+#endif
     Flags = PROCESSOR_ENABLED_BIT | PROCESSOR_HEALTH_STATUS_BIT;
     if (CpuInfo[Index].Flags & CPU_INFO_FLAG_PRIMARY_CPU) {
       Flags |= PROCESSOR_AS_BSP_BIT;

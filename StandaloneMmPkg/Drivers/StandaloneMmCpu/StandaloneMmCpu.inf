@@ -4,6 +4,7 @@
 #  Copyright (c) 2009, Apple Inc. All rights reserved.<BR>
 #  Copyright (c) 2016 HP Development Company, L.P.
 #  Copyright (c) 2017 - 2021, Arm Limited. All rights reserved.
+#  Copyright (c) 2023, Intel Corporation. All rights reserved.
 #
 #  SPDX-License-Identifier: BSD-2-Clause-Patent
 ##
@@ -17,6 +18,12 @@
   PI_SPECIFICATION_VERSION       = 0x00010032
   ENTRY_POINT                    = StandaloneMmCpuInitialize
 
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = ARM RISCV64
+#
+
 [Sources]
   StandaloneMmCpu.c
   StandaloneMmCpu.h
@@ -28,9 +35,15 @@
   MdeModulePkg/MdeModulePkg.dec
   StandaloneMmPkg/StandaloneMmPkg.dec
 
-[LibraryClasses]
+[LibraryClasses.ARM, LibraryClasses.AARCH64]
   ArmLib
   ArmSvcLib
+  BaseMemoryLib
+  DebugLib
+  HobLib
+  StandaloneMmDriverEntryPoint
+
+[LibraryClasses.RISCV64]
   BaseMemoryLib
   DebugLib
   HobLib

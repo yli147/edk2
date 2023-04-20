@@ -11,8 +11,14 @@
 #include <Base.h>
 #include <Pi/PiMmCis.h>
 
-#include <Library/ArmSvcLib.h>
-#include <Library/ArmLib.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <Library/ArmSvcLib.h>
+  #include <Library/ArmLib.h>
+#elif defined (MDE_CPU_RISCV64)
+  #include <Library/BaseRiscVSbiLib.h>
+#else
+  #error Unsupported Processor Type
+#endif
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
@@ -22,8 +28,10 @@
 #include <Guid/ZeroGuid.h>
 #include <Guid/MmramMemoryReserve.h>
 
-#include <IndustryStandard/ArmFfaSvc.h>
-#include <IndustryStandard/ArmStdSmc.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <IndustryStandard/ArmFfaSvc.h>
+  #include <IndustryStandard/ArmStdSmc.h>
+#endif
 
 #include "StandaloneMmCpu.h"
 
@@ -140,8 +148,10 @@ PiMmStandaloneArmTfCpuDriverEntry (
   // receipt of a synchronous MM request. Use the Event ID to distinguish
   // between synchronous and asynchronous events.
   //
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
   if ((ARM_SMC_ID_MM_COMMUNICATE != EventId) &&
       (ARM_SVC_ID_FFA_MSG_SEND_DIRECT_REQ != EventId))
+#endif
   {
     DEBUG ((DEBUG_ERROR, "UnRecognized Event - 0x%x\n", EventId));
     return EFI_INVALID_PARAMETER;

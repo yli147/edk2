@@ -12,8 +12,14 @@
 #include <Pi/PiMmCis.h>
 #include <Library/Arm/StandaloneMmCoreEntryPoint.h>
 #include <Library/DebugLib.h>
-#include <Library/ArmSvcLib.h>
-#include <Library/ArmLib.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <Library/ArmSvcLib.h>
+  #include <Library/ArmLib.h>
+#elif defined (MDE_CPU_RISCV64)
+  #include <Library/BaseRiscVSbiLib.h>
+#else
+  #error Unsupported Processor Type
+#endif
 #include <Library/BaseMemoryLib.h>
 #include <Library/HobLib.h>
 

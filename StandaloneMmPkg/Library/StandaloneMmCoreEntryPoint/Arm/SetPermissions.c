@@ -14,15 +14,23 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Guid/MpInformation.h>
 
 #include <Library/Arm/StandaloneMmCoreEntryPoint.h>
-#include <Library/ArmMmuLib.h>
-#include <Library/ArmSvcLib.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <Library/ArmMmuLib.h>
+  #include <Library/ArmSvcLib.h>
+#elif defined (MDE_CPU_RISCV64)
+  #include <Library/BaseRiscVSbiLib.h>
+#else
+  #error Unknown Processor Type
+#endif
 #include <Library/DebugLib.h>
 #include <Library/HobLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/SerialPortLib.h>
 
-#include <IndustryStandard/ArmStdSmc.h>
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <IndustryStandard/ArmStdSmc.h>
+#endif
 
 /**
   Privileged firmware assigns RO & Executable attributes to all memory occupied
