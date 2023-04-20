@@ -25,6 +25,7 @@
 #define SBI_EXT_DBCN                 0x4442434E
 #define SBI_EXT_TIME                 0x54494D45
 #define SBI_EXT_SRST                 0x53525354
+#define SBI_EXT_RPXY                 0x52505859
 
 /* SBI function IDs for base extension */
 #define SBI_EXT_BASE_SPEC_VERSION   0x0
@@ -53,6 +54,10 @@
 #define SBI_SRST_RESET_REASON_NONE     0x0
 #define SBI_SRST_RESET_REASON_SYSFAIL  0x1
 
+/* SBI function IDs for RPXY extension */
+#define SBI_RPXY_SETUP_SHMEM        0x1
+#define SBI_RPXY_SEND_NORMAL_MSG    0x2
+
 /* SBI return error codes */
 #define SBI_SUCCESS                0
 #define SBI_ERR_FAILED             -1
@@ -65,6 +70,16 @@
 #define SBI_ERR_ALREADY_STOPPED    -8
 
 #define SBI_LAST_ERR  SBI_ERR_ALREADY_STOPPED
+
+/* SBI RPMI Service IDs */
+#define SBI_RPMI_MM_TRANSPORT_ID    0x00
+#define SBI_RPMI_MM_SRV_GROUP       0x0A
+#define SBI_RPMI_MM_SRV_VERSION     0x01
+#define SBI_RPMI_MM_SRV_COMMUNICATE 0x02
+#define SBI_RPMI_MM_SRV_COMPLETE    0x03
+#define RPMI_SUCCESS                0x0
+#define RPMI_ERROR(A)               (((INT32)(A)) < 0)
+typedef INT32    RPMI_RESULT;
 
 typedef struct {
   UINT64    BootHartId;
@@ -185,4 +200,33 @@ RiscVSbiEcall (
   IN UINTN      Ext
   );
 
+/**
+  Set the RPXY Shared Memory.
+
+  @param    PageSize    Shared memory page size
+  @param    ShmemPhys   Shared memory physical address.
+  @retval   EFI_SUCCESS Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiRpxySetShmem(
+  IN UINT64 PageSize,
+  IN UINT64 ShmemPhys
+  );
+
+/**
+  Send the MM data through OpenSBI FW RPXY Extension SBI.
+
+  @param    Transportd  RPXY transport id
+  @param    SrvGrpId    RPXY extention service group id
+  @param    SrvId       RPXY extension service id
+  @retval   EFI_SUCCESS    Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiRpxySendNormalMessage(
+  IN UINT32 TransportId,
+  IN UINT32 SrvGrpId,
+  IN UINT8 SrvId
+  );
 #endif
