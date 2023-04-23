@@ -151,6 +151,8 @@ PiMmStandaloneArmTfCpuDriverEntry (
 #if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
   if ((ARM_SMC_ID_MM_COMMUNICATE != EventId) &&
       (ARM_SVC_ID_FFA_MSG_SEND_DIRECT_REQ != EventId))
+#elif defined (MDE_CPU_RISCV64)
+  if (SBI_COVE_SMM_COMMUNICATE != EventId)
 #endif
   {
     DEBUG ((DEBUG_ERROR, "UnRecognized Event - 0x%x\n", EventId));
