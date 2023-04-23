@@ -102,6 +102,10 @@
 !if $(MM_WITH_COVE_ENABLE) == FALSE
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress|0x22000000
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareFdSize|0x01000000
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
+  gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdMaxAuthVariableSize|0x2800
+
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableBase|0x22000000
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageVariableSize|0x00040000
   gEfiMdeModulePkgTokenSpaceGuid.PcdFlashNvStorageFtwWorkingBase|0x22040000
@@ -142,6 +146,7 @@
   #
   StandaloneMmPkg/Core/StandaloneMmCore.inf
   StandaloneMmPkg/Drivers/StandaloneMmCpu/StandaloneMmCpu.inf
+!if $(MM_WITH_COVE_ENABLE) == FALSE
   OvmfPkg/VirtNorFlashDxe/VirtNorFlashStandaloneMm.inf
   MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteStandaloneMm.inf
 
@@ -155,6 +160,7 @@
       VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
       VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   }
+!endif
 
 ###################################################################################################
 #
