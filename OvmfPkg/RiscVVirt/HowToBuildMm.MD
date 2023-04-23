@@ -29,7 +29,7 @@ Create a directory $WORKDIR that would hold source code of the components.
 
   QEMU should be installed now in $WORKDIR
 
-### 2. Compile UEFI for QEMU Virt
+### 2. Compile UEFI and StandaloneMM for QEMU Virt
 
    ```
    cd $WORKDIR
@@ -114,6 +114,22 @@ Create a directory $WORKDIR that would hold source code of the components.
    dtc -I dts -O dtb -o qemu-virt-new.dtb qemu-virt.dts
    ```
 
+# Memory layout and Bootup flow
+
+### QEMU Virt Board IO Mapping
+![image](https://github.com/intel-sandbox/personal.yli147.edk2/assets/21300636/df288581-b861-4120-b600-d3ac9f19f0ee)
+
+### QEMU Virt Board Boot Options
+   ```
+  -m 2G
+  -bios ./Penglai-Enclave-sPMP/opensbi-0.9/build-oe/qemu-virt-mm/platform/generic/firmware/fw_dynamic.elf
+  -drive file=./flash0.img,if=pflash,format=raw,unit=0
+  -drive file=./flash1.img,if=pflash,format=raw,unit=1
+  -serial tcp:localhost:54320 -serial tcp:localhost:54321
+   ```
+### QEMU Virt Boot Flow
+![image](https://github.com/intel-sandbox/personal.yli147.edk2/assets/21300636/26e91845-57eb-454f-b159-0ecce9489d02)
+  
 # Running
 
   The flash0.img file contains secure variables.
@@ -151,6 +167,3 @@ Create a directory $WORKDIR that would hold source code of the components.
   FS0:\> VariableTestApp.efi
   ```
   ![image](https://github.com/intel-sandbox/personal.yli147.edk2/assets/21300636/07c77dab-e523-45ea-82f1-f0f9fe0dc278)
-
-  
-  
