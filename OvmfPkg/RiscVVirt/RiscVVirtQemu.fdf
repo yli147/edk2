@@ -12,6 +12,23 @@
 !include RiscVVirt.fdf.inc
 
 ################################################################################
+!if $(SECURE_BOOT_ENABLE)
+[FD.RISCV_FLASH0]
+BaseAddress   = $(SECURE_FW_BASE_ADDRESS)
+Size          = $(SECURE_FW_SIZE)
+ErasePolarity = 1
+BlockSize     = $(BLOCK_SIZE)
+NumBlocks     = $(SECURE_FW_BLOCKS)
+
+
+# 0x00000000|$(SECURE_CODE_SIZE)
+# FILE = OvmfPkg/RiscVVirt/fw_dynamic.bin
+
+!include SecureVarStore.fdf.inc
+!endif
+################################################################################
+
+################################################################################
 [FD.RISCV_VIRT]
 BaseAddress   = $(FW_BASE_ADDRESS)|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress
 Size          = $(FW_SIZE)|gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareFdSize
@@ -62,10 +79,18 @@ INF  UefiCpuPkg/CpuDxeRiscV64/CpuDxeRiscV64.inf
 INF  MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
 INF  MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
 INF  MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
-INF  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
-INF  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE
-  INF  SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+
+#
+# Variable services
+#
+!if $(SECURE_BOOT_ENABLE) == FALSE
+  # INF ArmPlatformPkg/Drivers/NorFlashDxe/NorFlashDxe.inf
+  INF MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+  INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf
+!else
+INF OvmfPkg/RiscVVirt/MmCommunicationDxe/MmCommunication.inf
+  INF MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmmRuntimeDxe.inf
+  INF SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
 !endif
 INF  MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
 INF  MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
