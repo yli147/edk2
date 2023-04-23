@@ -172,6 +172,7 @@
 #
 ###################################################################################################
 [BuildOptions.RISCV64]
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
 !if $(MM_WITH_COVE_ENABLE) == TRUE
   GCC:*_*_*_CC_FLAGS = -DMM_WITH_COVE_ENABLE
 !endif
