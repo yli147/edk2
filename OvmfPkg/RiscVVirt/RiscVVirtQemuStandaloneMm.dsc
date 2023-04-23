@@ -149,3 +149,15 @@
       VariablePolicyLib|MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLib.inf
       VariablePolicyHelperLib|MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf
   }
+
+###################################################################################################
+#
+# BuildOptions Section - Define the module specific tool chain flags that should be used as
+#                        the default flags for a module. These flags are appended to any
+#                        standard flags that are defined by the build process. They can be
+#                        applied for any modules or only those modules with the specific
+#                        module style (EDK or EDKII) specified in [Components] section.
+#
+###################################################################################################
+[BuildOptions.RISCV64]
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
