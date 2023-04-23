@@ -177,6 +177,8 @@
   gUefiOvmfPkgTokenSpaceGuid.PcdMmBufferSize|0x00200000
 !if $(MM_WITH_COVE_ENABLE) == TRUE
   gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmMemSize|0x10000000
+  # # TODO: Need to enable secure flash variable support.
+  gEfiMdeModulePkgTokenSpaceGuid.PcdEmuVariableNvModeEnable|TRUE
 !endif
 !endif
 
@@ -302,12 +304,6 @@
   #
   UefiCpuPkg/CpuDxeRiscV64/CpuDxeRiscV64.inf
   MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf
-  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
-    <LibraryClasses>
-      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
-      # don't use unaligned CopyMem () on the UEFI varstore NOR flash region
-      BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
-  }
 
 !if $(SECURE_BOOT_ENABLE) == TRUE
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf {
@@ -323,13 +319,45 @@
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
 !endif
   MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf
-  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
   MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
-!if $(SECURE_BOOT_ENABLE) == TRUE && $(MM_WITH_COVE_ENABLE) == TRUE
+
+  #
+  # Variable services
+  #
+!if $(SECURE_BOOT_ENABLE) == FALSE
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
+    <LibraryClasses>
+      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
+      # AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+      # VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
+      # don't use unaligned CopyMem () on the UEFI varstore NOR flash region
+      BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  }
+!else
+!if $(MM_WITH_COVE_ENABLE) == TRUE
   UefiCpuPkg/RiscVCoVEDxe/RiscVCoVEDxe.inf
+  # # TODO: Need change to use VariableSmmRuntimeDxe, otherwise no StandaloneMm secure variable service !
+  MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf {
+    <LibraryClasses>
+      NULL|MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf
+      # AuthVariableLib|MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf
+      # VarCheckLib|MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf
+      # don't use unaligned CopyMem () on the UEFI varstore NOR flash region
+      BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
+  }
+!else
+  OvmfPkg/RiscVVirt/MmCommunicationDxe/MmCommunication.inf {
+   <LibraryClasses>
+      NULL|StandaloneMmPkg/Library/VariableMmDependency/VariableMmDependency.inf
+  }
+  MdeModulePkg/Universal/Variable/RuntimeDxe/VariableSmmRuntimeDxe.inf
+  # SecurityPkg/VariableAuthenticated/SecureBootConfigDxe/SecureBootConfigDxe.inf
+!endif
 !endif
 
   MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
