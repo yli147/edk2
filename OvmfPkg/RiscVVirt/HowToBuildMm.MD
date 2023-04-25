@@ -88,7 +88,7 @@ Create a directory $WORKDIR that would hold source code of the components.
 ### 5. Edit the Device Tree
   Non-secure shared memory between UEFI and standalone MM is
   allocated at 0xFFE00000. The non-secure shared memory base address
-  should be passed from trusted-firmware through the device
+  should be passed to UEFI through the device tree
    ```
    cd $WORKDIR
    ./qemu-system-riscv64 -nographic -machine virt,dumpdtb=qemu-virt.dtb -smp 4 -m 2G -bios ./Penglai-Enclave-sPMP/opensbi-0.9/build-oe/qemu-virt-mm/platform/generic/firmware/fw_dynamic.elf
@@ -132,8 +132,8 @@ Create a directory $WORKDIR that would hold source code of the components.
   
 # Running
 
-  The flash0.img file contains secure variables.
-  And the flash1.img file contains Non-secure UEFI code.
+  The flash0.img file contains secure variables,
+  and the flash1.img file contains Non-secure UEFI code.
   
   You may create a "run.sh" script as below content
   
@@ -159,7 +159,7 @@ Create a directory $WORKDIR that would hold source code of the components.
   ./run.sh
   ```
   
-  You can also download and use this VariableTestApp to query the secure variable info in efi shell
+  You can also download and use this VariableTestApp to query the secure variable info in edk2 shell
   ```
   wget -c https://wiki.ith.intel.com/download/attachments/2844652828/VariableTestApp.efi -P ~/src/fat/
   ./run.sh 
