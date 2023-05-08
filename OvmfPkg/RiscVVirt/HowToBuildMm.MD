@@ -10,9 +10,9 @@ of the OpenSBI or a TEE.
 
 Create a directory $WORKDIR that would hold source code of the components.
 
-  Qemu: https://github.com/qemu/qemu.git](https://github.com/intel-innersource/frameworks.platforms.risc-v.qemu/tree/devel-standalonemm
-  Edk2: https://github.com/tianocore/edk2](https://github.com/intel-innersource/frameworks.platforms.risc-v.edk2/tree/devel-standalonemm
-  OpenSBI: https://github.com/tianocore/edk2-platforms](https://github.com/intel-sandbox/personal.yli147.Penglai-Enclave-sPMP
+  Qemu: https://github.com/intel-innersource/frameworks.platforms.risc-v.qemu/tree/devel-standalonemm
+  Edk2: https://github.com/intel-innersource/frameworks.platforms.risc-v.edk2/tree/devel-standalonemm
+  OpenSBI: https://github.com/intel-sandbox/personal.yli147.Penglai-Enclave-sPMP
 
 ## Manual building
 
