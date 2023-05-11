@@ -94,6 +94,15 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
+#define TEST_SALUS
+#ifdef TEST_SALUS
+	typedef struct {
+	EFI_SECURE_PARTITION_BOOT_INFO   MmPayloadBootInfo;
+	EFI_SECURE_PARTITION_CPU_INFO	 MmCpuInfo[1];
+	} EFI_SECURE_SHARED_BUFFER;
+
+	EFI_SECURE_SHARED_BUFFER MmSharedBuffer;
+#endif
 
 /**
   The entry point of Standalone MM Foundation.
@@ -123,6 +132,35 @@ _ModuleEntryPoint (
   VOID                            *TeData;
   UINTN                           TeDataSize;
   EFI_PHYSICAL_ADDRESS            ImageBase;
+
+#ifdef TEST_SALUS
+  MmSharedBuffer.MmPayloadBootInfo.Header.Version = 0x01;
+	MmSharedBuffer.MmPayloadBootInfo.SpMemBase = 0x80C00000;
+	MmSharedBuffer.MmPayloadBootInfo.SpMemLimit = 0xAFF80000;
+	MmSharedBuffer.MmPayloadBootInfo.SpImageBase = 0x80C00000; // SpMemBase
+	MmSharedBuffer.MmPayloadBootInfo.SpStackBase = 0x81700000; // SpMemBase + SpImageSize
+	MmSharedBuffer.MmPayloadBootInfo.SpHeapBase  = 0x80F00000; // SpImageBase + SpHeapSize
+	MmSharedBuffer.MmPayloadBootInfo.SpNsCommBufBase = 0xFFE00000;
+	MmSharedBuffer.MmPayloadBootInfo.SpSharedBufBase = 0xAFF00000;
+	MmSharedBuffer.MmPayloadBootInfo.SpImageSize     = 0x300000;
+	MmSharedBuffer.MmPayloadBootInfo.SpPcpuStackSize = 0x10000;
+	MmSharedBuffer.MmPayloadBootInfo.SpHeapSize      = 0x800000;
+	MmSharedBuffer.MmPayloadBootInfo.SpNsCommBufSize = 0x200000;
+	MmSharedBuffer.MmPayloadBootInfo.SpSharedBufSize = 0x80000;
+	MmSharedBuffer.MmPayloadBootInfo.NumSpMemRegions = 0x6;
+	MmSharedBuffer.MmPayloadBootInfo.NumCpus = 1;
+	MmSharedBuffer.MmCpuInfo[0].LinearId = 0;
+	MmSharedBuffer.MmCpuInfo[0].Flags = 0;
+	MmSharedBuffer.MmPayloadBootInfo.CpuInfo = MmSharedBuffer.MmCpuInfo;
+
+  SharedBufAddress = &MmSharedBuffer;
+  SharedBufSize = sizeof(MmSharedBuffer);
+  void   *DriverEntryPoint = NULL;
+  SharedCpuEntry = (INT64)&DriverEntryPoint;
+  cookie = 0;
+#endif
+
+
   PayloadBootInfo = GetAndPrintBootinformation (SharedBufAddress);
   if (PayloadBootInfo == NULL) {
     Status = EFI_UNSUPPORTED;
