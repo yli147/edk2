@@ -17,6 +17,9 @@ STATIC BOOLEAN  mHaveLegacyPutchar = FALSE;
 STATIC BOOLEAN  mHaveLegacyGetchar = FALSE;
 STATIC INT64    mLastGetChar       = -1;
 
+/* Temppry workaround for Salus Hyper */
+STATIC BOOLEAN  mShareBuffer       = TRUE;
+
 /**
   Return whether the legacy console getchar extension is implemented.
   @retval TRUE                  Extension is implemented.
@@ -95,6 +98,13 @@ SerialPortWrite (
     return 0;
   }
 
+  if (mShareBuffer) {
+    UINT8  *SharedBufferBase = (UINT8  *) 0x100001000;
+    for(int i =0; i<NumberOfBytes; i++)
+      SharedBufferBase[i] = Buffer[i];
+      Buffer = SharedBufferBase;
+  }
+  
   if (mHaveDbcn) {
     return SbiDbcnWrite (Buffer, NumberOfBytes);
   } else if (mHaveLegacyPutchar) {
