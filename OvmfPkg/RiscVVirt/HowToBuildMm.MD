@@ -12,7 +12,7 @@ Create a directory $WORKDIR that would hold source code of the components.
 
   Edk2: https://github.com/yli147/edk2/commits/devel-standalonemm
   
-  OpenSBI: https://github.com/intel-sandbox/personal.yli147.Penglai-Enclave-sPMP.git (To be open)
+  OpenSBI: https://github.com/yli147/Penglai-Enclave-sPMP/commits/devel-standalonemm
 
 ## Manual building
 
