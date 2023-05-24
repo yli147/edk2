@@ -60,7 +60,7 @@ Create a directory $WORKDIR that would hold source code of the components.
 
    ```
    cd $WORKDIR
-   git clone https://github.com/intel-sandbox/personal.yli147.Penglai-Enclave-sPMP.git Penglai-Enclave-sPMP
+   git clone https://github.com/yli147/Penglai-Enclave-sPMP.git Penglai-Enclave-sPMP -b devel-standalonemm
    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 bash
    ```
   
