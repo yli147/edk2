@@ -1011,15 +1011,15 @@ CoreProcessFvImageFile (
 {
   EFI_STATUS                  Status;
   EFI_SECTION_TYPE            SectionType;
-  UINT32                      AuthenticationStatus;
+//  UINT32                      AuthenticationStatus;
   VOID                        *Buffer;
   VOID                        *AlignedBuffer;
   UINTN                       BufferSize;
   EFI_FIRMWARE_VOLUME_HEADER  *FvHeader;
   UINT32                      FvAlignment;
-  EFI_DEVICE_PATH_PROTOCOL    *FvFileDevicePath;
-  UINT32                      FvUsedSize;
-  UINT8                       EraseByte;
+//  EFI_DEVICE_PATH_PROTOCOL    *FvFileDevicePath;
+//  UINT32                      FvUsedSize;
+//  UINT8                       EraseByte;
   UINTN                       Index;
 
   //
@@ -1034,6 +1034,15 @@ CoreProcessFvImageFile (
     Buffer        = NULL;
     BufferSize    = 0;
     AlignedBuffer = NULL;
+	
+	//
+	// It is very strange, in RiscVirt, the return of the ReadSection always returns EFI_PROTOCOL_ERROR
+	// in CoreSectionExtraction.c:1107. But on VisionFive2, the ReadSection will return SUCCESS.
+	// Then if SUCCESS, here the logic is to ProduceFVBProtocolOnBuffer() and finally cause multiple NotifyFwVolBlock
+	// It could be a original RiscVVirt issue, currently workaround it by forcing the Status to EFI_PROTOCOL_ERROR for VisionFiveV2
+	//
+	Status        = EFI_PROTOCOL_ERROR;
+#if 0
     Status        = Fv->ReadSection (
                           Fv,
                           FileName,
@@ -1148,7 +1157,7 @@ CoreProcessFvImageFile (
                  NULL
                  );
     }
-
+#endif
     if (EFI_ERROR (Status)) {
       //
       // ReadSection or Produce FVB failed, Free data buffer
