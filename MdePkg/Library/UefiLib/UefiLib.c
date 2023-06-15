@@ -175,7 +175,7 @@ EfiCreateProtocolNotifyEvent (
   // Kick the event so we will perform an initial pass of
   // current installed drivers
   //
-
+  DEBUG ((DEBUG_INFO, "#### EfiCreateProtocolNotifyEvent  DEBUG 0\n"));
   gBS->SignalEvent (Event);
   return Event;
 }
