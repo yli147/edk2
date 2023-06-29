@@ -181,6 +181,10 @@ RiscVSetSupervisorAddressTranslationRegister (
   IN UINT64
   );
 
+VOID
+RiscVSetTimeCmp (
+  UINT64
+);
 UINT64
 RiscVReadTimer (
   VOID
