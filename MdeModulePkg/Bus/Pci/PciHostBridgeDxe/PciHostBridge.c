@@ -1032,6 +1032,8 @@ NotifyPhase (
                 break;
 
               case TypePMem64:
+              /*Workaound: Force PMem32 allocate with P-MMIO-64 range. (JH7110 does not have P-MMIO-32 range)*/
+              case TypePMem32:
                 BaseAddress = AllocateResource (
                                 TRUE,
                                 RootBridge->ResAllocNode[Index].Length,
@@ -1052,7 +1054,7 @@ NotifyPhase (
               //
               // If memory above 4GB is not available, try memory below 4GB
               //
-              case TypePMem32:
+              /*case TypePMem32:
                 BaseAddress = AllocateResource (
                                 TRUE,
                                 RootBridge->ResAllocNode[Index].Length,
@@ -1067,7 +1069,7 @@ NotifyPhase (
                                   )
                                 );
                 break;
-
+              */
               default:
                 ASSERT (FALSE);
                 break;
