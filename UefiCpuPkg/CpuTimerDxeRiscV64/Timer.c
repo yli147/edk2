@@ -94,7 +94,7 @@ TimerInterruptHandler (
                          ),
                        1000000u
                        );  // convert to tick
-  SbiSetTimer (PeriodStart);
+  RiscVSetTimeCmp (PeriodStart);
   RiscVEnableTimerInterrupt (); // enable SMode timer int
   gBS->RestoreTPL (OriginalTPL);
 }
@@ -197,7 +197,7 @@ TimerDriverSetTimerPeriod (
                          ),
                        1000000u
                        ); // convert to tick
-  SbiSetTimer (PeriodStart);
+  RiscVSetTimeCmp (PeriodStart);
 
   mCpu->EnableInterrupt (mCpu);
   RiscVEnableTimerInterrupt (); // enable SMode timer int
