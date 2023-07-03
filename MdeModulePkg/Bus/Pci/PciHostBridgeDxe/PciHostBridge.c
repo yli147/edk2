@@ -1088,7 +1088,8 @@ NotifyPhase (
               RootBridge->ResAllocNode[Index].Status = ResAllocated;
               DEBUG ((DEBUG_INFO, "Success\n"));
             } else {
-              ReturnStatus = EFI_OUT_OF_RESOURCES;
+              // ReturnStatus = EFI_OUT_OF_RESOURCES;
+              ReturnStatus = EFI_SUCCESS;
               DEBUG ((DEBUG_ERROR, "Out Of Resource!\n"));
             }
           }
