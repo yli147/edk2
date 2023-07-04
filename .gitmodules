@@ -32,3 +32,9 @@
 [submodule "MdePkg/Library/MipiSysTLib/mipisyst"]
 	path = MdePkg/Library/MipiSysTLib/mipisyst
 	url = https://github.com/MIPI-Alliance/public-mipi-sys-t.git
+[submodule "unicorn"]
+	path = unicorn
+	url = https://github.com/intel/unicorn-for-efi.git
+[submodule "MultiArchUefiPkg"]
+	path = MultiArchUefiPkg
+	url = https://github.com/intel/MultiArchUefiPkg.git
