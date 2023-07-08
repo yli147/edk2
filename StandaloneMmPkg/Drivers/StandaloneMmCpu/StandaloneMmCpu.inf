@@ -19,7 +19,6 @@
 
 [Sources]
   StandaloneMmCpu.c
-  StandaloneMmCpu.h
   EventHandle.c
 
 [Packages]
@@ -46,7 +45,7 @@
   gZeroGuid
   gMpInformationHobGuid
   gEfiStandaloneMmNonSecureBufferGuid
-  gEfiArmTfCpuDriverEpDescriptorGuid
+  gEfiMmCpuDriverEpDescriptorGuid
 
 [Depex]
   TRUE

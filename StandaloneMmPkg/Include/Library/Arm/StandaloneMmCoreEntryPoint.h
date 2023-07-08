@@ -47,17 +47,6 @@ typedef struct {
   EFI_SECURE_PARTITION_CPU_INFO    *CpuInfo;
 } EFI_SECURE_PARTITION_BOOT_INFO;
 
-typedef
-EFI_STATUS
-(*PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT) (
-  IN UINTN  EventId,
-  IN UINTN  CpuNumber,
-  IN UINTN  NsCommBufferAddr
-  );
-
-typedef struct {
-  PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT    *ArmTfCpuDriverEpPtr;
-} ARM_TF_CPU_DRIVER_EP_DESCRIPTOR;
 
 typedef RETURN_STATUS (*REGION_PERMISSION_UPDATE_FUNC) (
   IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
@@ -145,7 +134,7 @@ LocateStandaloneMmCorePeCoffData (
 VOID *
 EFIAPI
 CreateHobListFromBootInfo (
-  IN  OUT  PI_MM_ARM_TF_CPU_DRIVER_ENTRYPOINT  *CpuDriverEntryPoint,
+  IN  OUT  PI_MM_CPU_DRIVER_ENTRYPOINT  *CpuDriverEntryPoint,
   IN       EFI_SECURE_PARTITION_BOOT_INFO      *PayloadBootInfo
   );
 
