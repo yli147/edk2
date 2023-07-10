@@ -58,3 +58,9 @@
   gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFvBase|0|UINT64|0x0
   gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFvSize|0|UINT32|0x1
 
+  # The location of Standalone MM FD that will be copied to confidential memory
+  gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFdBase|0|UINT64|0x2
+
+  # The size reserved for Standalone MM, 4K aligned
+  gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmMemSize|0|UINT64|0x3
+
