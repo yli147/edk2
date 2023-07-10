@@ -35,6 +35,7 @@
   DEFINE TPM2_ENABLE             = FALSE
   DEFINE TPM2_CONFIG_ENABLE      = FALSE
   DEFINE DEBUG_ON_SERIAL_PORT    = TRUE
+  DEFINE MM_WITH_COVE_ENABLE     = FALSE
 
   #
   # Network definition
@@ -174,6 +175,9 @@
   gEfiSecurityPkgTokenSpaceGuid.PcdRemovableMediaImageVerificationPolicy|0x04
   gUefiOvmfPkgTokenSpaceGuid.PcdMmBufferBase|0xFFE00000
   gUefiOvmfPkgTokenSpaceGuid.PcdMmBufferSize|0x00200000
+!if $(MM_WITH_COVE_ENABLE) == TRUE
+  gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmMemSize|0x10000000
+!endif
 !endif
 
   gEfiShellPkgTokenSpaceGuid.PcdShellFileOperationSize|0x20000
@@ -324,6 +328,9 @@
   MdeModulePkg/Universal/ResetSystemRuntimeDxe/ResetSystemRuntimeDxe.inf
   EmbeddedPkg/RealTimeClockRuntimeDxe/RealTimeClockRuntimeDxe.inf
   EmbeddedPkg/MetronomeDxe/MetronomeDxe.inf
+!if $(SECURE_BOOT_ENABLE) == TRUE && $(MM_WITH_COVE_ENABLE) == TRUE
+  UefiCpuPkg/RiscVCoVEDxe/RiscVCoVEDxe.inf
+!endif
 
   MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf
   MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf

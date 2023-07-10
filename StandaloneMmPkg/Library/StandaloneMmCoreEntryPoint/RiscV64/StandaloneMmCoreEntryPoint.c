@@ -25,8 +25,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/PcdLib.h>
 
 #include "Library/BaseRiscVSbiLib.h"
+#include <Library/BaseRiscVCoVELib.h>
+#include <Library/CpuLib.h>
 
 #define BOOT_PAYLOAD_VERSION  1
+#define EFI_PARAM_ATTR_COVE   1
 
 PI_MM_CPU_DRIVER_ENTRYPOINT  CpuDriverEntryPoint = NULL;
 
@@ -104,6 +107,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
   EFI_STATUS  Status;
   ASSERT (((EFI_MM_COMMUNICATE_HEADER *)MmNsCommBufBase)->MessageLength == 0);
 
+#ifndef MM_WITH_COVE_ENABLE
   RPMI_RESULT RpmiResult;
   Status = SbiRpxySetShmem(EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
   if (EFI_ERROR (Status)) {
@@ -115,8 +119,10 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
     Status = EFI_ACCESS_DENIED;
     ASSERT (0);
   }
+#endif
 
   while (TRUE) {
+#ifndef MM_WITH_COVE_ENABLE
     Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMPLETE);
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -136,6 +142,10 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
         ));
     }
     Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof(RPMI_RESULT));
+#else
+    CpuSleep ();
+    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof (EFI_MMRAM_DESCRIPTOR));
+#endif
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -167,6 +177,15 @@ CModuleEntryPoint (
   if (PayloadBootInfo == NULL) {
     return;
   }
+
+#ifdef MM_WITH_COVE_ENABLE
+  if ((PayloadBootInfo->Header.Attr | EFI_PARAM_ATTR_COVE) != 0) {
+    //
+    // Register shared memory
+    //
+    SbiCoVGShareMemoryRegion (PayloadBootInfo->MmNsCommBufBase, PayloadBootInfo->MmNsCommBufSize);
+  }
+#endif
 
   //
   // Create Hoblist based upon boot information passed by privileged software
