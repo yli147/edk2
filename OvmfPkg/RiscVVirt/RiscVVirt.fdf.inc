@@ -13,7 +13,11 @@ DEFINE BLOCK_SIZE                  = 0x1000
 DEFINE PFLASH0_BASE                = 0x20000000
 DEFINE PFLASH1_BASE                = 0x22000000
 
+!if $(FW_BASE_ADDRESS)
+DEFINE CODE_BASE_ADDRESS           = $(FW_BASE_ADDRESS)
+!else
 DEFINE CODE_BASE_ADDRESS           = $(PFLASH0_BASE)
+!endif
 DEFINE CODE_SIZE                   = 0x00800000
 DEFINE CODE_BLOCKS                 = 0x800
 
@@ -37,3 +41,9 @@ DEFINE VARS_FTW_SPARE_SIZE           = 0x00040000
 SET gUefiCpuPkgTokenSpaceGuid.PcdCpuCoreCrystalClockFrequency = 10000000
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamBase = 0x83FF0000
 SET gUefiOvmfPkgTokenSpaceGuid.PcdOvmfSecPeiTempRamSize = 0x00010000
+
+!if $(SECURE_BOOT_ENABLE) == TRUE && $(MM_WITH_COVE_ENABLE) == TRUE
+  # Put Mm FD just behind normal FW
+  SET gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFdBase = $(CODE_BASE_ADDRESS) + $(CODE_SIZE)
+  SET gStandaloneMmPkgTokenSpaceGuid.PcdRiscVStandaloneMmFvSize = 0x00280000
+!endif
