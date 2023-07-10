@@ -53,6 +53,8 @@
 
 [LibraryClasses.RISCV64]
   RiscVSbiLib
+  RiscVTeeLib
+  CpuLib
 
 [Guids]
   gMpInformationHobGuid

@@ -220,6 +220,10 @@ INF  MdeModulePkg/Universal/Disk/RamDiskDxe/RamDiskDxe.inf
 
 #INF  MdeModulePkg/Universal/MemoryTest/NullMemoryTestDxe/NullMemoryTestDxe.inf
 
+!if $(SECURE_BOOT_ENABLE) == TRUE && $(MM_WITH_COVE_ENABLE) == TRUE
+  INF  UefiCpuPkg/RiscVTeeDxe/RiscVTeeDxe.inf
+!endif
+
 ################################################################################
 
 [FV.FVMAIN_COMPACT]

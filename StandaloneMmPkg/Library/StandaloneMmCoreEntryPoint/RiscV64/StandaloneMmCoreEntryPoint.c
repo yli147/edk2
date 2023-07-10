@@ -25,8 +25,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/PcdLib.h>
 
 #include "Library/BaseRiscVSbiLib.h"
+#include <Library/BaseRiscVTeeLib.h>
+#include <Library/CpuLib.h>
 
 #define BOOT_PAYLOAD_VERSION  1
+#define EFI_PARAM_ATTR_APTEE  1
 
 PI_MM_CPU_DRIVER_ENTRYPOINT  CpuDriverEntryPoint = NULL;
 
@@ -112,7 +115,11 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
   MmContext.PayloadAddress = (UINT64)&MmCompleteEvt;
 
   while (TRUE) {
-    SbiCallSmcMm(&MmContext);
+#ifdef MM_WITH_COVE_ENABLE
+    CpuSleep ();
+    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase);
+#else
+    SbiCallSmcMm (&MmContext);
     //
     // Passes SMC FID of the MM_COMMUNICATE interface as the Event ID upon
     // receipt of a synchronous MM request. Use the Event ID to distinguish
@@ -125,6 +132,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
     }
 
     Status = CpuDriverEntryPoint (MmCompleteEvt.FuncId, CpuId, MmNsCommBufBase);
+#endif
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -156,6 +164,15 @@ CModuleEntryPoint (
   if (PayloadBootInfo == NULL) {
     return;
   }
+
+#ifdef MM_WITH_COVE_ENABLE
+  if ((PayloadBootInfo->Header.Attr | EFI_PARAM_ATTR_APTEE) != 0) {
+    //
+    // Register shared memory
+    //
+    SbiTeeGuestShareMemoryRegion (PayloadBootInfo->MmNsCommBufBase, PayloadBootInfo->MmNsCommBufSize);
+  }
+#endif
 
   //
   // Create Hoblist based upon boot information passed by privileged software
