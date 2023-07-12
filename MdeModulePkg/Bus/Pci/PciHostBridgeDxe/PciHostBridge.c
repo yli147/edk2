@@ -1047,9 +1047,9 @@ NotifyPhase (
                                   RootBridge->PMemAbove4G.Translation
                                   )
                                 );
-                if (BaseAddress != MAX_UINT64) {
+                // if (BaseAddress != MAX_UINT64) {
                   break;
-                }
+                //}
 
               //
               // If memory above 4GB is not available, try memory below 4GB
