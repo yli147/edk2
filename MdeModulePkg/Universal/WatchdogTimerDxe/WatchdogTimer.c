@@ -7,6 +7,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "WatchdogTimer.h"
+#include <Library/BaseLib.h>
+#include <Library/DebugLib.h>
+
+#define MY_VAR_NAME L"MyVar"
+#define MY_VAR_GUID { 0xF299EF14, 0x61D1, 0x4BF0, { 0xBF, 0xBC, 0x56, 0x5A, 0xF8, 0x8D, 0xF0, 0xC9 } }
+#define MAX_SIZE 32
 
 //
 // Handle for the Watchdog Timer Architectural Protocol instance produced by this driver
@@ -239,6 +245,39 @@ WatchdogTimerDriverInitialize (
                   NULL
                   );
   ASSERT_EFI_ERROR (Status);
+
+#if 1
+  UINT64   MyVarSize = 30;
+  CHAR8    MyVarValue[MAX_SIZE] = {0};
+  EFI_GUID MyVarGuid = MY_VAR_GUID;
+
+
+  DEBUG((DEBUG_ERROR, "Reading variable...\n"));
+  Status = gRT->GetVariable(MY_VAR_NAME, &MyVarGuid, NULL, &MyVarSize, MyVarValue);
+  if(EFI_ERROR(Status)) {
+    if(Status == EFI_NOT_FOUND) {
+      DEBUG((DEBUG_ERROR, "Variable not found.\n"));
+    } else {
+      DEBUG((DEBUG_ERROR, "Error to get UEFI variable: %r\n", Status));
+    }
+
+    MyVarSize = 20;
+    AsciiStrCpyS(MyVarValue, MyVarSize, "EFI Var Cnt:\0");
+    MyVarValue[15] = 0;
+  } else {
+    MyVarSize = 20;
+    MyVarValue[15] = MyVarValue[15] + 1;
+  }
+
+  Status = gRT->SetVariable(MY_VAR_NAME,
+                            &MyVarGuid,
+                            EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+                            MyVarSize,
+                            MyVarValue);
+  if(EFI_ERROR(Status)) {
+    DEBUG((DEBUG_ERROR, "Error to set UEFI variable: %r\n", Status));
+  }
+#endif
 
   return EFI_SUCCESS;
 }
