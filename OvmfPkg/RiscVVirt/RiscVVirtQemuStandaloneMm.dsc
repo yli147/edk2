@@ -101,7 +101,7 @@
   gEfiMdePkgTokenSpaceGuid.PcdMaximumGuidedExtractHandler|0x2
 !if $(MM_WITH_COVE_ENABLE) == FALSE
   gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFdBaseAddress|0x22000000
-  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareFdSize|0x01000000
+  gUefiOvmfPkgTokenSpaceGuid.PcdOvmfFirmwareFdSize|0xC0000
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxVariableSize|0x2000
   gEfiSecurityPkgTokenSpaceGuid.PcdUserPhysicalPresence|TRUE
   gEfiMdeModulePkgTokenSpaceGuid.PcdMaxAuthVariableSize|0x2800
