@@ -25,7 +25,7 @@
 #define SBI_EXT_DBCN                 0x4442434E
 #define SBI_EXT_TIME                 0x54494D45
 #define SBI_EXT_SRST                 0x53525354
-#define SBI_EXT_SMC                  0x48923468
+#define SBI_EXT_RPXY                 0x52505859
 
 /* SBI function IDs for base extension */
 #define SBI_EXT_BASE_SPEC_VERSION   0x0
@@ -41,7 +41,6 @@
 #define SBI_EXT_DBCN_READ        0x1
 #define SBI_EXT_DBCN_WRITE_BYTE  0x2
 
-
 /* SBI function IDs for TIME extension */
 #define SBI_EXT_TIME_SET_TIMER  0x0
 
@@ -55,10 +54,9 @@
 #define SBI_SRST_RESET_REASON_NONE     0x0
 #define SBI_SRST_RESET_REASON_SYSFAIL  0x1
 
-/* SBI function IDs for SMC extension */
-#define SBI_SMC_MM_VERSION             0x80
-#define SBI_SMC_MM_COMMUNICATE         0x81
-#define SBI_SMC_MM_COMPLETE_EVT        0x82
+/* SBI function IDs for RPXY extension */
+#define SBI_RPXY_SETUP_SHMEM        0x1
+#define SBI_RPXY_SEND_NORMAL_MSG    0x2
 
 /* SBI return error codes */
 #define SBI_SUCCESS                0
@@ -73,18 +71,22 @@
 
 #define SBI_LAST_ERR  SBI_ERR_ALREADY_STOPPED
 
+/* SBI RPMI Service IDs */
+#define SBI_RPMI_MM_TRANSPORT_ID    0x00
+#define SBI_RPMI_MM_SRV_GROUP       0x0A
+#define SBI_RPMI_MM_SRV_VERSION     0x01
+#define SBI_RPMI_MM_SRV_COMMUNICATE 0x02
+#define SBI_RPMI_MM_SRV_COMPLETE    0x03
+#define RPMI_SUCCESS                0x0
+#define RPMI_ERROR(A)               (((INT32)(A)) < 0)
+typedef INT32    RPMI_RESULT;
+
 typedef struct {
   UINT64    BootHartId;
   VOID      *PeiServiceTable;    // PEI Service table
   VOID      *PrePiHobList;       // Pre PI Hob List
   UINT64    FlattenedDeviceTree; // Pointer to Flattened Device tree
 } EFI_RISCV_FIRMWARE_CONTEXT;
-
-typedef struct {
-  UINT64    FuncId;              // MM Func ID
-  UINT64    Cookie;              // MM Cookie
-  UINT64    PayloadAddress;      // MM Payload Address
-} EFI_RISCV_MM_CONTEXT;
 
 //
 // EDK2 OpenSBI firmware extension return status.
@@ -199,15 +201,32 @@ RiscVSbiEcall (
   );
 
 /**
-  Send the MM data through OpenSBI FW SMC Extension SBI.
+  Set the RPXY Shared Memory.
 
-  @param    MmContextPtr   Pointer to MM Context.
+  @param    PageSize    Shared memory page size
+  @param    ShmemPhys   Shared memory physical address.
+  @retval   EFI_SUCCESS Success is returned from the functin in SBI.
+**/
+EFI_STATUS
+EFIAPI
+SbiRpxySetShmem(
+  IN UINT64 PageSize,
+  IN UINT64 ShmemPhys
+  );
+
+/**
+  Send the MM data through OpenSBI FW RPXY Extension SBI.
+
+  @param    Transportd  RPXY transport id
+  @param    SrvGrpId    RPXY extention service group id
+  @param    SrvId       RPXY extension service id
   @retval   EFI_SUCCESS    Success is returned from the functin in SBI.
 **/
 EFI_STATUS
 EFIAPI
-SbiCallSmcMm (
-  IN  EFI_RISCV_MM_CONTEXT  *MmContextPtr
- );
-
+SbiRpxySendNormalMessage(
+  IN UINT32 TransportId,
+  IN UINT32 SrvGrpId,
+  IN UINT8 SrvId
+  );
 #endif

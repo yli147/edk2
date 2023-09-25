@@ -105,33 +105,46 @@ EFIAPI
 DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
 {
   EFI_STATUS  Status;
-  EFI_RISCV_MM_CONTEXT MmContext;
-  EFI_RISCV_MM_CONTEXT MmCompleteEvt;
   ASSERT (((EFI_MM_COMMUNICATE_HEADER *)MmNsCommBufBase)->MessageLength == 0);
 
-  ZeroMem (&MmContext, sizeof (EFI_RISCV_MM_CONTEXT));
-  // SMC MM Func ID
-  MmContext.FuncId = SBI_SMC_MM_COMPLETE_EVT;
-  MmContext.PayloadAddress = (UINT64)&MmCompleteEvt;
+#ifndef MM_WITH_COVE_ENABLE
+  RPMI_RESULT RpmiResult;
+  Status = SbiRpxySetShmem(EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "DelegatedEventLoop: "
+      "Failed to set shared memory\n"
+      ));
+    Status = EFI_ACCESS_DENIED;
+    ASSERT (0);
+  }
+#endif
 
   while (TRUE) {
-#ifdef MM_WITH_COVE_ENABLE
-    CpuSleep ();
-    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase);
-#else
-    SbiCallSmcMm (&MmContext);
-    //
-    // Passes SMC FID of the MM_COMMUNICATE interface as the Event ID upon
-    // receipt of a synchronous MM request. Use the Event ID to distinguish
-    // between synchronous and asynchronous events.
-    //
-    if (SBI_SMC_MM_COMMUNICATE != (UINT32)MmCompleteEvt.FuncId)
-    {
-      DEBUG ((DEBUG_ERROR, "UnRecognized Event - 0x%x\n", (UINT32)MmCompleteEvt.FuncId));
-      continue;
+#ifndef MM_WITH_COVE_ENABLE
+    Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMPLETE);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "DelegatedEventLoop: "
+        "Failed to commuicate\n"
+        ));
+      Status = EFI_ACCESS_DENIED;
+      ASSERT (0);
     }
-
-    Status = CpuDriverEntryPoint (MmCompleteEvt.FuncId, CpuId, MmNsCommBufBase);
+    CopyMem (&RpmiResult, (VOID *)MmNsCommBufBase, sizeof(RPMI_RESULT));
+    if (RPMI_ERROR (RpmiResult)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "RPMI Error 0x%x\n",
+        RpmiResult
+        ));
+    }
+    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof(RPMI_RESULT));
+#else
+    CpuSleep ();
+    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof (EFI_MMRAM_DESCRIPTOR));
 #endif
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -186,5 +199,5 @@ CModuleEntryPoint (
 
   DEBUG ((DEBUG_INFO, "Cpu Driver EP %p\n", (VOID *)CpuDriverEntryPoint));
 
-  DelegatedEventLoop (CpuId, PayloadBootInfo->MmNsCommBufBase + sizeof (EFI_MMRAM_DESCRIPTOR));
+  DelegatedEventLoop (CpuId, PayloadBootInfo->MmNsCommBufBase);
 }
