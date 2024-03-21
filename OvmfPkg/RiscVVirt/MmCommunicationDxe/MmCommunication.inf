@@ -33,6 +33,8 @@
   OvmfPkg/OvmfPkg.dec
 
 [LibraryClasses]
+  MemoryAllocationLib
+  UefiRuntimeLib
   BaseMemoryLib
   DebugLib
   DxeServicesTableLib
@@ -47,6 +49,7 @@
   gEfiEndOfDxeEventGroupGuid
   gEfiEventExitBootServicesGuid
   gEfiEventReadyToBootGuid
+  gEfiEventVirtualAddressChangeGuid             ## CONSUMES ## Event
 
 [Pcd.common]
   gUefiOvmfPkgTokenSpaceGuid.PcdMmBufferBase

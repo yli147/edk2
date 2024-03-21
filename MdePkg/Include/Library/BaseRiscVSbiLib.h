@@ -227,6 +227,7 @@ EFIAPI
 SbiRpxySendNormalMessage(
   IN UINT32 TransportId,
   IN UINT32 SrvGrpId,
-  IN UINT8 SrvId
+  IN UINT8 SrvId,
+  IN UINT64 MsgDataLen
   );
 #endif
