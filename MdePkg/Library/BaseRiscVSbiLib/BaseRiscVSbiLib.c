@@ -271,17 +271,19 @@ EFIAPI
 SbiRpxySendNormalMessage(
   IN UINT32 TransportId,
   IN UINT32 SrvGrpId,
-  IN UINT8 SrvId
+  IN UINT8 SrvId,
+  IN UINT64 MsgDataLen
   )
 {
   SBI_RET  Ret;
   Ret = SbiCall (
           SBI_EXT_RPXY,
           SBI_RPXY_SEND_NORMAL_MSG,
-          3,
+          4,
           TransportId,
           SrvGrpId,
-          SrvId
+          SrvId,
+          MsgDataLen
           );
   return TranslateError (Ret.Error);
 }
