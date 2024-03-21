@@ -102,14 +102,17 @@ GetAndPrintBootinformation (
 **/
 VOID
 EFIAPI
-DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
+DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase, IN UINT64 MmNsCommBufSize)
 {
   EFI_STATUS  Status;
-  ASSERT (((EFI_MM_COMMUNICATE_HEADER *)MmNsCommBufBase)->MessageLength == 0);
-
+  UINTN BufferSize = 0;
+  EFI_MM_COMMUNICATE_HEADER  *CommunicateHeader = (EFI_MM_COMMUNICATE_HEADER  *)MmNsCommBufBase;
+  ASSERT (((EFI_MM_COMMUNICATE_HEADER *)CommunicateHeader)->MessageLength == 0);
+  BufferSize = CommunicateHeader->MessageLength +
+               sizeof (CommunicateHeader->HeaderGuid) +
+               sizeof (CommunicateHeader->MessageLength);
 #ifndef MM_WITH_COVE_ENABLE
-  RPMI_RESULT RpmiResult;
-  Status = SbiRpxySetShmem(EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
+  Status = SbiRpxySetShmem((MmNsCommBufSize / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -123,7 +126,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
 
   while (TRUE) {
 #ifndef MM_WITH_COVE_ENABLE
-    Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMPLETE);
+    Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMPLETE, BufferSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
@@ -133,15 +136,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
       Status = EFI_ACCESS_DENIED;
       ASSERT (0);
     }
-    CopyMem (&RpmiResult, (VOID *)MmNsCommBufBase, sizeof(RPMI_RESULT));
-    if (RPMI_ERROR (RpmiResult)) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "RPMI Error 0x%x\n",
-        RpmiResult
-        ));
-    }
-    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof(RPMI_RESULT));
+    Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase);
 #else
     CpuSleep ();
     Status = CpuDriverEntryPoint (0, CpuId, MmNsCommBufBase + sizeof (EFI_MMRAM_DESCRIPTOR));
@@ -152,6 +147,11 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase)
         "Failed delegated Status 0x%x\n",
         Status
         ));
+    } else {
+      CommunicateHeader = (EFI_MM_COMMUNICATE_HEADER  *)(MmNsCommBufBase);
+      BufferSize = CommunicateHeader->MessageLength +
+               sizeof (CommunicateHeader->HeaderGuid) +
+               sizeof (CommunicateHeader->MessageLength);
     }
   }
 }
@@ -199,5 +199,5 @@ CModuleEntryPoint (
 
   DEBUG ((DEBUG_INFO, "Cpu Driver EP %p\n", (VOID *)CpuDriverEntryPoint));
 
-  DelegatedEventLoop (CpuId, PayloadBootInfo->MmNsCommBufBase);
+  DelegatedEventLoop (CpuId, PayloadBootInfo->MmNsCommBufBase, PayloadBootInfo->MmNsCommBufSize);
 }

@@ -82,7 +82,6 @@ MmCommunication2Communicate (
 
   EFI_STATUS                 Status;
   UINTN                      BufferSize;
-  RPMI_RESULT                RpmiResult;
 
   Status     = EFI_ACCESS_DENIED;
   BufferSize = 0;
@@ -95,7 +94,6 @@ MmCommunication2Communicate (
   }
 
   Status            = EFI_SUCCESS;
-  RpmiResult        = RPMI_SUCCESS;
   CommunicateHeader = CommBufferVirtual;
   // CommBuffer is a mandatory parameter. Hence, Rely on
   // MessageLength + Header to ascertain the
@@ -129,10 +127,9 @@ MmCommunication2Communicate (
   // environment then return the expected size.
   //
   if ((CommunicateHeader->MessageLength == 0) ||
-      (BufferSize > (mNsCommBuffMemRegion.Length - sizeof(RPMI_RESULT))))
+      (BufferSize > mNsCommBuffMemRegion.Length))
   {
     CommunicateHeader->MessageLength = mNsCommBuffMemRegion.Length -
-                                       sizeof(RPMI_RESULT) -
                                        sizeof (CommunicateHeader->HeaderGuid) -
                                        sizeof (CommunicateHeader->MessageLength);
     Status = EFI_BAD_BUFFER_SIZE;
@@ -143,28 +140,22 @@ MmCommunication2Communicate (
     return Status;
   }
 
-  CopyMem ((VOID *)mNsCommBuffMemRegion.VirtualBase, &RpmiResult, sizeof(RPMI_RESULT));
   // Copy Communication Payload
-  CopyMem ((VOID *)mNsCommBuffMemRegion.VirtualBase + sizeof(RPMI_RESULT), CommBufferVirtual, BufferSize);
+  CopyMem ((VOID *)mNsCommBuffMemRegion.VirtualBase, CommBufferVirtual, BufferSize);
 
   // Call the Standalone MM environment.
-  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMMUNICATE);
+  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMMUNICATE, BufferSize);
   switch (Status) {
     case EFI_SUCCESS:
-      CopyMem (&RpmiResult, (VOID *)mNsCommBuffMemRegion.VirtualBase, sizeof(RPMI_RESULT));
-      if (RPMI_ERROR (RpmiResult)) {
-        Status = EFI_UNSUPPORTED;
-        ASSERT (0);
-      }
       ZeroMem (CommBufferVirtual, BufferSize);
-      CommunicateHeader = (EFI_MM_COMMUNICATE_HEADER *)(mNsCommBuffMemRegion.VirtualBase + sizeof(RPMI_RESULT));
+      CommunicateHeader = (EFI_MM_COMMUNICATE_HEADER *)(mNsCommBuffMemRegion.VirtualBase);
       BufferSize        = CommunicateHeader->MessageLength +
                           sizeof (CommunicateHeader->HeaderGuid) +
                           sizeof (CommunicateHeader->MessageLength);
 
       CopyMem (
         CommBufferVirtual,
-        (VOID *)(mNsCommBuffMemRegion.VirtualBase + sizeof(RPMI_RESULT)),
+        (VOID *)(mNsCommBuffMemRegion.VirtualBase),
         BufferSize
         );
 
@@ -192,10 +183,9 @@ GetMmCompatibility (
   )
 {
   EFI_STATUS    Status;
-  RPMI_RESULT   RpmiResult;
   UINT32        MmVersion;
 
-  Status = SbiRpxySetShmem(EFI_PAGE_SIZE, mNsCommBuffMemRegion.PhysicalBase);
+  Status = SbiRpxySetShmem((mNsCommBuffMemRegion.Length / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, mNsCommBuffMemRegion.PhysicalBase);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -206,14 +196,9 @@ GetMmCompatibility (
     ASSERT (0);
   }
 
-  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_VERSION);
+  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_VERSION, 0);
   if (Status == EFI_SUCCESS) {
-    CopyMem (&RpmiResult, (VOID *)mNsCommBuffMemRegion.VirtualBase, sizeof(RPMI_RESULT));
-    if (RPMI_ERROR (RpmiResult)) {
-      Status = EFI_UNSUPPORTED;
-      ASSERT (0);
-    }
-    CopyMem (&MmVersion, (VOID *)mNsCommBuffMemRegion.VirtualBase + sizeof(RPMI_RESULT), sizeof(UINT32));
+    CopyMem (&MmVersion, (VOID *)mNsCommBuffMemRegion.VirtualBase, sizeof(UINT32));
     if ((MM_MAJOR_VER (MmVersion) == MM_CALLER_MAJOR_VER) &&
         (MM_MINOR_VER (MmVersion) >= MM_CALLER_MINOR_VER))
     {
@@ -310,7 +295,7 @@ MmCommunication2Initialize (
   mNsCommBuffMemRegion.PhysicalBase = PcdGet64 (PcdMmBufferBase);
   // During boot , Virtual and Physical are same
   mNsCommBuffMemRegion.VirtualBase = mNsCommBuffMemRegion.PhysicalBase;
-  mNsCommBuffMemRegion.Length      = PcdGet64 (PcdMmBufferSize);
+  mNsCommBuffMemRegion.Length = PcdGet64 (PcdMmBufferSize);
 
   ASSERT (mNsCommBuffMemRegion.PhysicalBase != 0);
 
