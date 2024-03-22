@@ -57,16 +57,6 @@ GetAndPrintBootinformation (
     return NULL;
   }
 
-  if (PayloadBootInfo->Header.Version != BOOT_PAYLOAD_VERSION) {
-    DEBUG ((
-      DEBUG_ERROR,
-      "Boot Information Version Mismatch. Current=0x%x, Expected=0x%x.\n",
-      PayloadBootInfo->Header.Version,
-      BOOT_PAYLOAD_VERSION
-      ));
-    return NULL;
-  }
-
   DEBUG ((DEBUG_INFO, "NumMmMemRegions - 0x%x\n", PayloadBootInfo->NumMmMemRegions));
   DEBUG ((DEBUG_INFO, "MmMemBase       - 0x%lx\n", PayloadBootInfo->MmMemBase));
   DEBUG ((DEBUG_INFO, "MmMemLimit      - 0x%lx\n", PayloadBootInfo->MmMemLimit));
