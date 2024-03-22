@@ -1,0 +1,37 @@
+## @file
+#  RISC V instance of MM Unblock Page Library.
+#
+#  This library provides an interface to request non-MMRAM pages to be mapped/unblocked
+#  from inside MM environment.
+#
+#  For MM modules that need to access regions outside of MMRAMs, the agents that set up
+#  these regions are responsible for invoking this API in order for these memory areas
+#  to be accessed from inside MM.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = RiscVMmUnblockMemoryLib
+  MODULE_UNI_FILE                = MmUnblockMemoryLib.uni
+  FILE_GUID                      = 5A14E5E4-6569-4162-BB7A-062A4107391D
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MmUnblockMemoryLib
+
+#
+#  VALID_ARCHITECTURES           = RISCV64
+#
+
+[LibraryClasses]
+  BaseLib
+  RiscVSbiLib
+
+[Sources]
+  MmUnblockMemoryLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec

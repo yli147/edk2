@@ -17,6 +17,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiRuntimeLib.h>
+#include <Library/MmUnblockMemoryLib.h>
 
 #include <Protocol/MmCommunication2.h>
 
@@ -187,7 +188,7 @@ GetMmCompatibility (
   EFI_STATUS    Status;
   UINT32        MmVersion;
 
-  Status = SbiRpxySetShmem((mNsCommBuffMemRegion.Length / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, mNsCommBuffMemRegion.PhysicalBase);
+  Status = MmUnblockMemoryRequest(mNsCommBuffMemRegion.PhysicalBase, (mNsCommBuffMemRegion.Length / EFI_PAGE_SIZE) * EFI_PAGE_SIZE);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,

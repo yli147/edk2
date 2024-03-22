@@ -12,6 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Library/StandaloneMmCpu.h>
 #include <Library/RiscV64/StandaloneMmCoreEntryPoint.h>
+#include <Library/MmUnblockMemoryLib.h>
 
 #include <PiPei.h>
 #include <Guid/MmramMemoryReserve.h>
@@ -112,7 +113,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase, IN UINT64 MmNsCom
                sizeof (CommunicateHeader->HeaderGuid) +
                sizeof (CommunicateHeader->MessageLength);
 #ifndef MM_WITH_COVE_ENABLE
-  Status = SbiRpxySetShmem((MmNsCommBufSize / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
+  Status = MmUnblockMemoryRequest(MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1), (MmNsCommBufSize / EFI_PAGE_SIZE) * EFI_PAGE_SIZE);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,

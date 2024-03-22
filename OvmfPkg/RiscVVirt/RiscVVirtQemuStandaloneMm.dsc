@@ -58,6 +58,7 @@
   RiscVSbiLib|MdePkg/Library/BaseRiscVSbiLib/BaseRiscVSbiLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
   RiscVCoVELib|MdePkg/Library/BaseRiscVCoVELib/BaseRiscVCoVELib.inf
+  MmUnblockMemoryLib|OvmfPkg/RiscVVirt/Library/RiscVMmUnblockMemoryLib/MmUnblockMemoryLib.inf
 !if $(MM_WITH_COVE_ENABLE) == FALSE
   SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
 !else
