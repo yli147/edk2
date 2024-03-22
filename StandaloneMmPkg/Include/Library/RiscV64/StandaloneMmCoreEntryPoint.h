@@ -18,13 +18,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define CPU_INFO_FLAG_PRIMARY_CPU  0x00000001
 
 typedef struct {
-  UINT8     Type;    /* type of the structure */
-  UINT8     Version; /* version of this structure */
-  UINT16    Size;    /* size of this structure in bytes */
-  UINT32    Attr;    /* attributes */
-} EFI_PARAM_HEADER;
-
-typedef struct {
   UINT32    ProcessorId;
   UINT32    Package;
   UINT32    Core;
@@ -32,7 +25,6 @@ typedef struct {
 } EFI_RISCV_MM_CPU_INFO;
 
 typedef struct {
-  EFI_PARAM_HEADER                 Header;
   UINT64                           MmMemBase;
   UINT64                           MmMemLimit;
   UINT64                           MmImageBase;
@@ -50,7 +42,7 @@ typedef struct {
   EFI_RISCV_MM_CPU_INFO            CpuInfo;
 } EFI_RISCV_MM_BOOT_INFO;
 
-#define BOOT_INFO_STACK_BASE_OFFSET    32 // Used in assembly
+#define BOOT_INFO_STACK_BASE_OFFSET    24 // Used in assembly
 STATIC_ASSERT (BOOT_INFO_STACK_BASE_OFFSET == OFFSET_OF (EFI_RISCV_MM_BOOT_INFO, MmStackBase));
 typedef RETURN_STATUS (*REGION_PERMISSION_UPDATE_FUNC) (
   IN  EFI_PHYSICAL_ADDRESS  BaseAddress,
