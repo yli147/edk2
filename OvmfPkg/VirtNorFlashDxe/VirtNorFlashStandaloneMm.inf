@@ -36,6 +36,7 @@
   BaseMemoryLib
   DebugLib
   IoLib
+  SafeIntLib
   MemoryAllocationLib
   MmServicesTableLib
   VirtNorFlashPlatformLib
