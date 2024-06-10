@@ -102,7 +102,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase, IN UINT64 MmNsCom
                sizeof (CommunicateHeader->HeaderGuid) +
                sizeof (CommunicateHeader->MessageLength);
 #ifndef MM_WITH_COVE_ENABLE
-  Status = SbiRpxySetShmem((MmNsCommBufSize / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
+  Status = SbiMpxySetShmem((MmNsCommBufSize / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, MmNsCommBufBase & ~(EFI_PAGE_SIZE - 1));
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -116,7 +116,7 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINT64 MmNsCommBufBase, IN UINT64 MmNsCom
 
   while (TRUE) {
 #ifndef MM_WITH_COVE_ENABLE
-    Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMPLETE, BufferSize);
+    Status = SbiMpxySendNormalMessage(SBI_MPXY_MSGPROTO_STMM_ID, SBI_MPXY_STMM_MSG_CHANNEL_ID, BufferSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,

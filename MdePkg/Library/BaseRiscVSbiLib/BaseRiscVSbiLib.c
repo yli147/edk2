@@ -230,7 +230,7 @@ SetFirmwareContextPointer (
 }
 
 /**
-  Set the RPXY Shared Memory.
+  Set the MPXY Shared Memory.
 
   @param    PageSize    Shared memory page size
   @param    ShmemPhys   Shared memory physical address.
@@ -238,15 +238,15 @@ SetFirmwareContextPointer (
 **/
 EFI_STATUS
 EFIAPI
-SbiRpxySetShmem(
+SbiMpxySetShmem(
   IN UINT64 PageSize,
   IN UINT64 ShmemPhys
   )
 {
   SBI_RET  Ret;
   Ret = SbiCall (
-          SBI_EXT_RPXY,
-          SBI_RPXY_SETUP_SHMEM,
+          SBI_EXT_MPXY,
+          SBI_EXT_MPXY_SET_SHMEM,
           6,
           PageSize,
           ShmemPhys,
@@ -259,30 +259,28 @@ SbiRpxySetShmem(
 }
 
 /**
-  Send the MM data through OpenSBI FW RPXY Extension SBI.
+  Send the MM data through OpenSBI FW MPXY Extension SBI.
 
-  @param    Transportd  RPXY transport id
-  @param    SrvGrpId    RPXY extention service group id
-  @param    SrvId       RPXY extension service id
-  @retval   EFI_SUCCESS    Success is returned from the functin in SBI.
+  @param    ProtocolId	MPXY protocol id
+  @param    ChannelId	MPXY Channel id
+  @param    MsgDataLen	RPXY data length
+  @retval   EFI_SUCCESS	Success is returned from the functin in SBI.
 **/
 EFI_STATUS
 EFIAPI
-SbiRpxySendNormalMessage(
-  IN UINT32 TransportId,
-  IN UINT32 SrvGrpId,
-  IN UINT8 SrvId,
+SbiMpxySendNormalMessage(
+  IN UINT32 ProtocolId,
+  IN UINT8 	ChannelId,
   IN UINT64 MsgDataLen
   )
 {
   SBI_RET  Ret;
   Ret = SbiCall (
-          SBI_EXT_RPXY,
-          SBI_RPXY_SEND_NORMAL_MSG,
-          4,
-          TransportId,
-          SrvGrpId,
-          SrvId,
+          SBI_EXT_MPXY,
+          SBI_EXT_MPXY_SEND_MSG_NO_RESP,
+          3,
+          ProtocolId,
+          ChannelId,
           MsgDataLen
           );
   return TranslateError (Ret.Error);

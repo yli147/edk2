@@ -144,7 +144,7 @@ MmCommunication2Communicate (
   CopyMem ((VOID *)mNsCommBuffMemRegion.VirtualBase, CommBufferVirtual, BufferSize);
 
   // Call the Standalone MM environment.
-  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_COMMUNICATE, BufferSize);
+  Status = SbiMpxySendNormalMessage(SBI_MPXY_MSGPROTO_STMM_ID, SBI_MPXY_STMM_MSG_CHANNEL_ID, BufferSize);
   switch (Status) {
     case EFI_SUCCESS:
       ZeroMem (CommBufferVirtual, BufferSize);
@@ -183,9 +183,9 @@ GetMmCompatibility (
   )
 {
   EFI_STATUS    Status;
-  UINT32        MmVersion;
+//  UINT32        MmVersion;
 
-  Status = SbiRpxySetShmem((mNsCommBuffMemRegion.Length / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, mNsCommBuffMemRegion.PhysicalBase);
+  Status = SbiMpxySetShmem((mNsCommBuffMemRegion.Length / EFI_PAGE_SIZE) * EFI_PAGE_SIZE, mNsCommBuffMemRegion.PhysicalBase);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -196,7 +196,8 @@ GetMmCompatibility (
     ASSERT (0);
   }
 
-  Status = SbiRpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_GROUP, SBI_RPMI_MM_SRV_VERSION, 0);
+#if 0
+  Status = SbiMpxySendNormalMessage(SBI_RPMI_MM_TRANSPORT_ID, SBI_RPMI_MM_SRV_VERSION, 0);
   if (Status == EFI_SUCCESS) {
     CopyMem (&MmVersion, (VOID *)mNsCommBuffMemRegion.VirtualBase, sizeof(UINT32));
     if ((MM_MAJOR_VER (MmVersion) == MM_CALLER_MAJOR_VER) &&
@@ -228,6 +229,7 @@ GetMmCompatibility (
       Status = EFI_ACCESS_DENIED;
       ASSERT (0);
   }
+#endif  
   return Status;
 }
 
