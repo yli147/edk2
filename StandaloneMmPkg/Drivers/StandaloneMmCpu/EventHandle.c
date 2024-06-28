@@ -21,6 +21,10 @@
 #include <Guid/ZeroGuid.h>
 #include <Guid/MmramMemoryReserve.h>
 
+#if defined (MDE_CPU_ARM) || defined (MDE_CPU_AARCH64)
+  #include <IndustryStandard/ArmFfaSvc.h>
+  #include <IndustryStandard/ArmStdSmc.h>
+#endif
 #include <StandaloneMmCpu.h>
 
 EFI_STATUS
