@@ -141,6 +141,8 @@ SbiMpxySendMessage(
       (const VOID *)Phys,
       Ret.Value
       );
+    if(ResponseLen)
+    *ResponseLen = Ret.Value;
   }
 
   return TranslateError (Ret.Error);

@@ -14,7 +14,7 @@
   FILE_GUID       = 8e992db5-4383-4023-a24e-7c99955bde80
   MODULE_TYPE     = DXE_DRIVER
   VERSION_STRING  = 1.0
-  LIBRARY_CLASS   = DxeRiscvMpxyLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_APPLICATION UEFI_DRIVER
+  LIBRARY_CLASS   = DxeRiscvMpxyLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_APPLICATION UEFI_DRIVER MM_CORE_STANDALONE
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -24,6 +24,6 @@
 
 [LibraryClasses]
   DebugLib
-  UefiBootServicesTableLib
+#  UefiBootServicesTableLib
   RiscVSbiLib
   SafeIntLib
