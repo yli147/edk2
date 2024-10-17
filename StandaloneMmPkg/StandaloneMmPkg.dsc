@@ -144,3 +144,6 @@ GCC:*_*_*_CC_FLAGS = -fno-stack-protector
 [BuildOptions.X64]
   MSFT:*_*_*_DLINK_FLAGS = /ALIGN:4096
   GCC:*_GCC*_*_DLINK_FLAGS = -z common-page-size=0x1000
+
+[BuildOptions.RISV64]
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
