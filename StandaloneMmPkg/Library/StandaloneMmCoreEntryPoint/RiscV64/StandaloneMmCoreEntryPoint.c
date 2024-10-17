@@ -159,9 +159,19 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINTN ChannelId, IN RISCV_SMM_MSG_COMM_AR
 STATIC
 VOID
 InitRiscVSmmArgs (
+  IN UINTN ChannelId,
   OUT RISCV_SMM_MSG_COMM_ARGS  *InitMmFoundationSmmArgs
   )
 {
+  if (SbiMpxyChannelOpen (ChannelId) != EFI_SUCCESS) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "InitRiscVSmmArgs: "
+      "Failed to set shared memory\n"
+      ));
+    ASSERT (0);
+  }
+#if 0
   EFI_STATUS  Status;
   VOID *SbiShmem;
   UINT64 ShmemP;
@@ -191,7 +201,7 @@ InitRiscVSmmArgs (
     Status = EFI_ACCESS_DENIED;
     ASSERT (0);
   }
-
+#endif
   InitMmFoundationSmmArgs->Arg0 = RISCV_SMM_RET_SUCCESS;
   InitMmFoundationSmmArgs->Arg1 = 0;
 }
@@ -232,6 +242,6 @@ CModuleEntryPoint (
   DEBUG ((DEBUG_INFO, "Cpu Driver EP %p\n", (VOID *)CpuDriverEntryPoint));
 
   ZeroMem (&InitMmFoundationSmmArgs, sizeof (InitMmFoundationSmmArgs));
-  InitRiscVSmmArgs (&InitMmFoundationSmmArgs);
+  InitRiscVSmmArgs (PayloadBootInfo->MpxyChannelId, &InitMmFoundationSmmArgs);
   DelegatedEventLoop (CpuId, PayloadBootInfo->MpxyChannelId, &InitMmFoundationSmmArgs);
 }

@@ -53,7 +53,7 @@
 
 [LibraryClasses.RISCV64]
   RiscVSbiLib
-  DxeRiscvMpxyLib
+  RiscvMpxyLib
 
 [Guids]
   gMpInformationHobGuid

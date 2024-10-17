@@ -57,8 +57,9 @@
   VariableFlashInfoLib|MdeModulePkg/Library/BaseVariableFlashInfoLib/BaseVariableFlashInfoLib.inf
   RiscVSbiLib|MdePkg/Library/BaseRiscVSbiLib/BaseRiscVSbiLib.inf
   SafeIntLib|MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf
-  DxeRiscvMpxyLib|MdePkg/Library/DxeRiscvMpxyLib/DxeRiscvMpxy.inf
+  RiscvMpxyLib|StandaloneMmPkg/Library/StandaloneMmRiscvMpxyLib/StandaloneMmRiscvMpxy.inf
   SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
+  HobPrintLib|MdeModulePkg/Library/HobPrintLib/HobPrintLib.inf
 
   #
   # Entry point

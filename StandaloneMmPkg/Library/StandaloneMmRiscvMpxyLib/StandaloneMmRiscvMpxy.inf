@@ -1,0 +1,31 @@
+# @file
+# Provides implementation of the library to communicate over SBI MPXY on RISCV architecture
+#
+# @copyright
+# Copyright (c) Ventana Micro Systems, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION     = 0x0001001A 
+  BASE_NAME       = RiscvMpxyLib
+  MODULE_UNI_FILE = RiscvMpxy.uni
+  FILE_GUID       = 8e992db5-4383-4023-a24e-7c99955bde80
+  MODULE_TYPE     = MM_STANDALONE
+  VERSION_STRING  = 1.0
+  PI_SPECIFICATION_VERSION       = 0x00010032
+  LIBRARY_CLASS   = RiscvMpxyLib|MM_STANDALONE MM_CORE_STANDALONE
+  CONSTRUCTOR     = SbiMpxyLibConstructor
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[Sources]
+  StandaloneMmRiscvMpxy.c
+
+[LibraryClasses]
+  DebugLib
+#  UefiBootServicesTableLib
+  RiscVSbiLib
+  SafeIntLib

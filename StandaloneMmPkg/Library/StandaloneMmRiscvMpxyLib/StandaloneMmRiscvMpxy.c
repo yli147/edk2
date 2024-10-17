@@ -239,7 +239,7 @@ SbiMpxyReadChannelAttrs(
   if (!gMpxyLibInitialized) {
 	  return (EFI_DEVICE_ERROR);
   }
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 0\n"));
   /* Set the shared memory to memory allocated for non-channel specific reads */
   Status = SbiMpxySetShmem(0,
              (UINT64)gNonChanTempShmem,
@@ -249,11 +249,11 @@ SbiMpxyReadChannelAttrs(
              &OPhysSize,
              TRUE /* Read back the old address */
              );
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 1\n"));
   if (EFI_ERROR(Status)) {
     return (EFI_DEVICE_ERROR);
   }
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 2\n"));
   Ret = SbiCall (
           SBI_EXT_MPXY,
           SBI_EXT_MPXY_READ_ATTRS,
@@ -262,16 +262,16 @@ SbiMpxyReadChannelAttrs(
           BaseAttrId, /* Base attribute Id */
           NrAttrs /* Number of attributes */
           );
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 3\n"));
   if (Ret.Error != SBI_SUCCESS) {
     return TranslateError (Ret.Error);
   }
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 4\n"));
   CopyMem(Attrs,
     gNonChanTempShmem,
     sizeof(UINT32) * NrAttrs
     );
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 5\n"));
   /* Switch back to old shared memory */
   Status = SbiMpxySetShmem(OPhysHi,
              OPhysLo,
@@ -281,11 +281,11 @@ SbiMpxyReadChannelAttrs(
              NULL,
              FALSE /* Read back the old address */
              );
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 6\n"));
   if (EFI_ERROR(Status)) {
     return Status;
   }
-
+DEBUG ((DEBUG_ERROR, "SbiMpxyReadChannelAttrs DEBUG 7\n"));
   return EFI_SUCCESS;
 }
 
@@ -300,21 +300,29 @@ SbiMpxyChannelOpen(
   VOID *SbiShmem;
   UINTN NrEfiPages;
   EFI_STATUS Status;
-
+DEBUG ((
+        DEBUG_ERROR,
+        "StandaloneMmSbiMpxyChannelOpen DEBUG 0\n"));
   if (SbiMpxyShmemInitialized() == FALSE) {
     return (EFI_UNSUPPORTED);
   }
-
+DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyChannelOpen DEBUG 1\n"));
   Status = SbiMpxyReadChannelAttrs(ChannelId,
              0,
              MpxyChanAttrMax,
              &Attributes[0]
              );
-
+DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyChannelOpen DEBUG 2\n"));
   if (EFI_ERROR(Status)) {
     return Status;
   }
-
+DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyChannelOpen DEBUG 3\n"));
   ChanDataLen = Attributes[MpxyChanAttrMsgDataMaxLen];
   NrEfiPages = EFI_SIZE_TO_PAGES(ChanDataLen);
 
@@ -422,7 +430,9 @@ SbiMpxySendMessage(
 {
   SBI_RET  Ret;
   UINT64 Phys = gShmemPhysLo;
-
+DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxySendMessage0\n"));
   if (!gShmemSet) {
     return EFI_DEVICE_ERROR;
   }
@@ -437,7 +447,9 @@ SbiMpxySendMessage(
     Message,
     MessageDataLen
     );
-
+DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxySendMessage1\n"));
   Ret = SbiCall (
           SBI_EXT_MPXY,
           SBI_EXT_MPXY_SEND_MSG_WITH_RESP,
@@ -458,6 +470,10 @@ SbiMpxySendMessage(
     *ResponseLen = Ret.Value;
   }
 
+  DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxySendMessage2\n"));
+
   return TranslateError (Ret.Error);
 }
 
@@ -473,16 +489,22 @@ SbiMpxySendMessage(
 RETURN_STATUS
 EFIAPI
 SbiMpxyLibConstructor (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  IN EFI_HANDLE            ImageHandle,
+  IN EFI_MM_SYSTEM_TABLE   *MmSystemTable
   )
 {
 #define MPXY_SHMEM_SIZE 4096
 
   EFI_STATUS                   Status;
-
+  DEBUG ((DEBUG_INFO, "################################# StandaloneMmSbiMpxyLibConstructor ##############################\n"));
+  
+  DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyLibConstructor XX DEBUG 0\n"));
   Status = SbiProbeExtension(SBI_EXT_MPXY);
-
+  DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyLibConstructor XX DEBUG 1\n"));
   ASSERT_EFI_ERROR (Status);
 
   //
@@ -492,11 +514,15 @@ SbiMpxyLibConstructor (
   gNonChanTempShmem = AllocateAlignedPages (EFI_SIZE_TO_PAGES(MPXY_SHMEM_SIZE),
                         MPXY_SHMEM_SIZE // Align
                         );
-
+  DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyLibConstructor XX DEBUG 2\n"));
   if (gNonChanTempShmem == NULL) {
     return (0);
   }
-
+  DEBUG ((
+        DEBUG_ERROR,
+        "SbiMpxyLibConstructor XX DEBUG 3\n"));
   gMpxyLibInitialized = TRUE;
 
   return (0);

@@ -370,8 +370,10 @@ MmCommunication2Initialize (
 {
   EFI_STATUS  Status;
   UINTN       Index;
+#if 0
   VOID        *SbiShmem;
   UINT64      ShmemP;
+#endif
 
   // Check if the Mpxy channel exist
   Status = GetMmMpxyChannelId(&mMmChannelId);
@@ -379,6 +381,16 @@ MmCommunication2Initialize (
     goto ReturnErrorStatus;
   }
 
+  if (SbiMpxyChannelOpen (mMmChannelId) != EFI_SUCCESS) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "InitRiscVSmmArgs: "
+      "Failed to set shared memory\n"
+      ));
+    ASSERT (0);
+  }
+
+#if 0
   if(FALSE == SbiMpxyShmemInitialized()) {
 	//
 	// Allocate memory to be shared with OpenSBI for MPXY
@@ -400,6 +412,7 @@ MmCommunication2Initialize (
 		goto ReturnErrorStatus;
     }
   }
+#endif
 
   // Check if we can make the MM call
   Status = GetMmCompatibility ();
