@@ -39,6 +39,15 @@ typedef struct {
   UINTN    Arg1;
 } RISCV_SMM_MSG_COMM_ARGS;
 
+
+typedef struct {
+  UINT32    Arg0;
+  UINT32    Arg1;
+  UINT32    Arg2;
+  UINT32    Arg3;
+  UINT32    Arg4;
+} RISCV_SMM_MSG_ATTR_ARGS;
+
 typedef struct {
   EFI_PHYSICAL_ADDRESS          PhysicalBase;
   EFI_VIRTUAL_ADDRESS           VirtualBase;

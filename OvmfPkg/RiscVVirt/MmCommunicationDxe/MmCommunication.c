@@ -267,23 +267,37 @@ STATIC EFI_MM_COMMUNICATION2_PROTOCOL  mMmCommunication2 = {
 
 STATIC
 EFI_STATUS
-GetMmCompatibility (
+GetMmAttr (
   )
 {
   EFI_STATUS    Status;
+  UINT32        MmStatus;
   UINT32        MmVersion;
-  RISCV_SMM_MSG_COMM_ARGS  MmVersionArgs;
+  UINT32        MmSmmAddrLo;
+  UINT32        MmSmmAddrHi;
+  UINT32        MmSmmSize;
+  RISCV_SMM_MSG_ATTR_ARGS  MmVersionArgs;
   UINTN         MmRespLen;
 
   Status = SbiMpxySendMessage(mMmChannelId, RISCV_MSG_ID_SMM_VERSION,
-		(VOID *)&MmVersionArgs, sizeof (RISCV_SMM_MSG_COMM_ARGS),
+		(VOID *)&MmVersionArgs, sizeof (RISCV_SMM_MSG_ATTR_ARGS),
 		(VOID *)&MmVersionArgs, &MmRespLen);
 
   if (EFI_ERROR (Status) || (0 == MmRespLen)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "MmCommunication2Communicate %d %d.\n",
+      EFI_ERROR (Status),
+      MmRespLen
+      ));
     return Status;
   }
-
-  MmVersion = MmVersionArgs.Arg0;
+  
+  MmStatus = MmVersionArgs.Arg0;
+  MmVersion = MmVersionArgs.Arg1;
+  MmSmmAddrLo = MmVersionArgs.Arg2;
+  MmSmmAddrHi = MmVersionArgs.Arg3;
+  MmSmmSize = MmVersionArgs.Arg4;
 
   if ((MM_MAJOR_VER (MmVersion) == MM_CALLER_MAJOR_VER) &&
       (MM_MINOR_VER (MmVersion) >= MM_CALLER_MINOR_VER))
@@ -306,6 +320,14 @@ GetMmCompatibility (
       ));
     Status = EFI_UNSUPPORTED;
   }
+  mNsCommBuffMemRegion.PhysicalBase = (UINTN)MmSmmAddrHi << 32 | MmSmmAddrLo;
+  // During boot , Virtual and Physical are same
+  mNsCommBuffMemRegion.VirtualBase = mNsCommBuffMemRegion.PhysicalBase;
+  mNsCommBuffMemRegion.Length      = MmSmmSize;
+
+  ASSERT (mNsCommBuffMemRegion.PhysicalBase != 0);
+
+  ASSERT (mNsCommBuffMemRegion.Length != 0);
 
   return Status;
 }
@@ -415,11 +437,12 @@ MmCommunication2Initialize (
 #endif
 
   // Check if we can make the MM call
-  Status = GetMmCompatibility ();
+  Status = GetMmAttr ();
   if (EFI_ERROR (Status)) {
     goto ReturnErrorStatus;
   }
-
+  
+#if 0  
   mNsCommBuffMemRegion.PhysicalBase = PcdGet64 (PcdMmBufferBase);
   // During boot , Virtual and Physical are same
   mNsCommBuffMemRegion.VirtualBase = mNsCommBuffMemRegion.PhysicalBase;
@@ -428,7 +451,7 @@ MmCommunication2Initialize (
   ASSERT (mNsCommBuffMemRegion.PhysicalBase != 0);
 
   ASSERT (mNsCommBuffMemRegion.Length != 0);
-
+#endif
   // Install the communication protocol
   Status = gBS->InstallProtocolInterface (
                   &mMmCommunicateHandle,
