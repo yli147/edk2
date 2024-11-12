@@ -81,43 +81,55 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
-/**
-  A loop to delegated events.
+#define SBI_EXT_SSE				0x535345
+/* SBI Function IDs for SSE extension */
+#define SBI_EXT_SSE_READ_ATTR		0x00000000
+#define SBI_EXT_SSE_WRITE_ATTR		0x00000001
+#define SBI_EXT_SSE_REGISTER		0x00000002
+#define SBI_EXT_SSE_UNREGISTER		0x00000003
+#define SBI_EXT_SSE_ENABLE		0x00000004
+#define SBI_EXT_SSE_DISABLE		0x00000005
+#define SBI_EXT_SSE_COMPLETE		0x00000006
+#define SBI_EXT_SSE_INJECT		0x00000007
+#define SBI_EXT_SSE_HART_MASK		0x00000008
+#define SBI_EXT_SSE_HART_UNMASK		0x00000009
+#define SBI_SSE_EVENT_LOCAL_MPXY_NOTIF  0xffff1000
 
-  @param  [in] EventCompleteSvcArgs   Pointer to the event completion arguments.
+UINT32 gCpuID = 0;
+UINT32 gChannelID = 0;
+EFI_STATUS
+SseEvtComplete(
+   VOID
+  )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_COMPLETE,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
+  return TranslateError (Ret.Error);
+}
 
-**/
 VOID
-EFIAPI
-DelegatedEventLoop (IN UINTN CpuId, IN UINTN ChannelId, IN RISCV_SMM_MSG_COMM_ARGS  *EventCompleteSvcArgs)
+// DelegatedEventLoop (IN UINTN CpuId, IN UINTN ChannelId, IN RISCV_SMM_MSG_COMM_ARGS  *EventCompleteSvcArgs)
+DelegatedEvent (
+  VOID
+ )
 {
   EFI_STATUS  Status;
   UINTN       SmmStatus;
   UINTN       SmmMsgLen, SmmRespLen;
+
+  //SbiSeeComplete();   
   SmmMsgLen = sizeof(RISCV_SMM_MSG_COMM_ARGS);
-
-  while (TRUE) {
-    Status = SbiMpxySendMessage (
-                   ChannelId,
-				   RISCV_MSG_ID_SMM_EVENT_COMPLETE,
-				   EventCompleteSvcArgs,
-				   SmmMsgLen,
-				   EventCompleteSvcArgs,
-				   &SmmRespLen);
-    if (EFI_ERROR (Status) || (sizeof(RISCV_SMM_MSG_COMM_ARGS) != SmmRespLen)) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "DelegatedEventLoop: "
-        "Failed to commuicate\n"
-        ));
-      Status = EFI_ACCESS_DENIED;
-      ASSERT (0);
-    }
-
-    Status = CpuDriverEntryPoint (
+  Status = CpuDriverEntryPoint (
                    0,
-                   CpuId,
-                   EventCompleteSvcArgs->Arg0
+                   gCpuID,
+                   0xFFE00000
                    );
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -146,8 +158,63 @@ DelegatedEventLoop (IN UINTN CpuId, IN UINTN ChannelId, IN RISCV_SMM_MSG_COMM_AR
         SmmStatus = RISCV_SMM_RET_NOT_SUPPORTED;
         break;
     }
-    EventCompleteSvcArgs->Arg0 = SmmStatus;
+    Status = SbiMpxySendMessage (
+                   gChannelID,
+				   RISCV_MSG_ID_SMM_EVENT_COMPLETE,
+				   (RISCV_SMM_MSG_COMM_ARGS  *)0xFFE00000,
+				   SmmMsgLen,
+				   (RISCV_SMM_MSG_COMM_ARGS  *)0xFFE00000,
+				   &SmmRespLen);
+    if (EFI_ERROR (Status) || (sizeof(RISCV_SMM_MSG_COMM_ARGS) != SmmRespLen)) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "DelegatedEventLoop: "
+        "Failed to commuicate\n"
+        ));
+      Status = EFI_ACCESS_DENIED;
+      ASSERT (0);
+    }
+    SseEvtComplete();        
+}
+
+EFI_STATUS
+SseEvtRegister(
+  VOID
+ )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_REGISTER,
+          3,
+          SBI_SSE_EVENT_LOCAL_MPXY_NOTIF,
+          &DelegatedEvent,
+          NULL
+          );
+
+  if (Ret.Error == 0) {
+    Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_ENABLE,
+          1,
+          SBI_SSE_EVENT_LOCAL_MPXY_NOTIF,
+          NULL,
+          NULL
+          );
   }
+
+  if (Ret.Error == 0) {
+    Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_HART_UNMASK,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
+  }
+
+  return TranslateError (Ret.Error);
 }
 
 /**
@@ -171,37 +238,7 @@ InitRiscVSmmArgs (
       ));
     ASSERT (0);
   }
-#if 0
-  EFI_STATUS  Status;
-  VOID *SbiShmem;
-  UINT64 ShmemP;
-  UINT32 PhysHiAddress;
-  UINT32 PhysLoAddress;
 
-  //
-	// Allocate memory to be shared with OpenSBI for MPXY
-	//
-	SbiShmem = AllocateAlignedPages (EFI_SIZE_TO_PAGES(RISCV_SMM_MSG_SHMEM_SIZE),
-				RISCV_SMM_MSG_SHMEM_SIZE // Align
-				);
-	if (SbiShmem == NULL) {
-		 ASSERT (0);
-	}
-  ZeroMem (SbiShmem, RISCV_SMM_MSG_SHMEM_SIZE);
-  ShmemP = (UINT64)(SbiShmem);
-  PhysHiAddress = (UINT32)(ShmemP >> 32);
-  PhysLoAddress = (UINT32)(ShmemP & 0xFFFFFFFF);
-  Status = SbiMpxySetShmem(PhysHiAddress, PhysLoAddress, RISCV_SMM_MSG_SHMEM_SIZE);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_ERROR,
-      "DelegatedEventLoop: "
-      "Failed to set shared memory\n"
-      ));
-    Status = EFI_ACCESS_DENIED;
-    ASSERT (0);
-  }
-#endif
   InitMmFoundationSmmArgs->Arg0 = RISCV_SMM_RET_SUCCESS;
   InitMmFoundationSmmArgs->Arg1 = 0;
 }
@@ -243,5 +280,8 @@ CModuleEntryPoint (
 
   ZeroMem (&InitMmFoundationSmmArgs, sizeof (InitMmFoundationSmmArgs));
   InitRiscVSmmArgs (PayloadBootInfo->MpxyChannelId, &InitMmFoundationSmmArgs);
-  DelegatedEventLoop (CpuId, PayloadBootInfo->MpxyChannelId, &InitMmFoundationSmmArgs);
-}
+  gCpuID = CpuId;
+  gChannelID = PayloadBootInfo->MpxyChannelId;
+  SseEvtRegister();
+  SseEvtComplete();
+ }

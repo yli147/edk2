@@ -157,10 +157,11 @@ MmCommunication2Communicate (
   Status = SbiMpxySendMessage(mMmChannelId, RISCV_MSG_ID_SMM_COMMUNICATE,
 		(VOID *)&CommunicateArgs, sizeof (RISCV_SMM_MSG_COMM_ARGS),
 		(VOID *)&CommunicateArgs, &MmRespLen);
-  if (EFI_ERROR (Status) || (0 == MmRespLen)) {
+  // if (EFI_ERROR (Status) || (0 == MmRespLen)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
-
+  CommunicateArgs.Arg0 = RISCV_SMM_RET_SUCCESS;
   switch (CommunicateArgs.Arg0) {
     case RISCV_SMM_RET_SUCCESS:
       ZeroMem (CommBufferVirtual, BufferSize);
