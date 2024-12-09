@@ -47,6 +47,12 @@ struct GuidMapping {
 STATIC struct GuidMapping  GuidChidArray[] = {
   {
     MM_STR, &gMmHestGetErrorSourceInfoGuid, 0
+  },
+  {
+    MM_STR, &gEfiSmmVariableProtocolGuid, 0
+  },
+  {
+    MM_STR, &gVarCheckPolicyLibMmiHandlerGuid, 0
   }
 };
 
@@ -264,7 +270,7 @@ MmCommunication2Communicate (
   // comm_size_address (not used, indicated by setting to zero)
   CommunicateArgs.Arg1 = 0;
 
-  GetChannelForGuid (&CommunicateHeader->HeaderGuid, &ChannelId);
+  Status = GetChannelForGuid (&CommunicateHeader->HeaderGuid, &ChannelId);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "No Channel Mapping Found For Requested Service"));
     return Status;

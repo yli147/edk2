@@ -15,6 +15,7 @@ typedef enum {
   MpxyChanAttrMsgDataMaxLen,
   MpxyChanAttrMsgSendTimeout,
   MpxyChanAttrCapability,
+  MpxyChanAttrMsiControl,
   MpxyChanAttrMsiAddrLow,
   MpxyChanAttrMsiAddrHigh,
   MpxyChanAttrMsiData,

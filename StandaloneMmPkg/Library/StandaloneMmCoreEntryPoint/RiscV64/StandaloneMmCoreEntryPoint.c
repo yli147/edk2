@@ -86,6 +86,27 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
+#define SBI_EXT_SSE				0x535345
+#define SBI_EXT_SSE_COMPLETE		0x00000006
+#define SBI_EXT_SSE_HART_UNMASK		0x00000009
+
+EFI_STATUS
+SseEvtComplete(
+   VOID
+  )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_COMPLETE,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
+  return TranslateError (Ret.Error);
+}
+
 #include <Library/DebugLib.h>
 
 void
@@ -293,6 +314,7 @@ DelegatedEventLoop (
   EventCompleteSvcArgs->mm_data.Arg0 = SmmStatus;
   DEBUG ((DEBUG_INFO, "Status %x\n", SmmStatus));
   SendMMComplete (ChannelId, EventCompleteSvcArgs);
+  SseEvtComplete();
 }
 
 /**
@@ -377,6 +399,7 @@ RiscVSseCallback (
   IN VOID    *Arg
   )
 {
+  DEBUG ((DEBUG_INFO, "------ RiscVSseCallback -----\n"));
   RISCV_SSE_MM_CONTEXT  *Context = Arg;
 
   DelegatedEventLoop (Context->CpuId, Context->MpxyChannelId, Context->SmmMessageCmd);
@@ -440,6 +463,14 @@ InitRiscVSse (
            );
     ASSERT (0);
   }
+  SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_HART_UNMASK,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
 }
 
 /** Returns the HOB data for the matching HOB GUID.
@@ -535,6 +566,7 @@ CModuleEntryPoint (
   DEBUG ((DEBUG_INFO, "mNsCommBuffer.PhysicalSize - 0x%lx\n", (UINTN)NsCommBufMmramRange->PhysicalSize));
 
   //  UINTN       SmmMsgLen, SmmRespLen;
-  SendMMComplete (PayloadBootInfo->MpxyChannelId, InitMmFoundationSmmArgs);
+  // SendMMComplete (PayloadBootInfo->MpxyChannelId, InitMmFoundationSmmArgs);
+  SseEvtComplete();
   ASSERT(0);
 }
