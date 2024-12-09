@@ -14,14 +14,17 @@ typedef enum {
   MpxyChanAttrProtVersion,
   MpxyChanAttrMsgDataMaxLen,
   MpxyChanAttrMsgSendTimeout,
+  MpxyChanAttrMsgCompleteTimeout,
   MpxyChanAttrCapability,
+  MpxyChanAttrSseEventId,
+  MpxyChanAttrMsiControl,
   MpxyChanAttrMsiAddrLow,
   MpxyChanAttrMsiAddrHigh,
   MpxyChanAttrMsiData,
-  MpxyChanAttrSseEventId,
   MpxyChanAttrEventStateControl,
   MpxyChanAttrMax
 } SBI_MPXY_CHAN_ATTR;
+
 
 
 /**

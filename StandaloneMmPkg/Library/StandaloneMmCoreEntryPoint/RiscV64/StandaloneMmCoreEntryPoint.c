@@ -86,6 +86,27 @@ GetAndPrintBootinformation (
   return PayloadBootInfo;
 }
 
+#define SBI_EXT_SSE				0x535345
+#define SBI_EXT_SSE_COMPLETE		0x00000006
+#define SBI_EXT_SSE_HART_UNMASK		0x00000008
+
+EFI_STATUS
+SseEvtComplete(
+   VOID
+  )
+{
+  SBI_RET  Ret;
+  Ret = SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_COMPLETE,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
+  return TranslateError (Ret.Error);
+}
+
 #include <Library/DebugLib.h>
 
 void
@@ -377,6 +398,7 @@ RiscVSseCallback (
   IN VOID    *Arg
   )
 {
+  DEBUG ((DEBUG_INFO, "------ RiscVSseCallback -----\n"));
   RISCV_SSE_MM_CONTEXT  *Context = Arg;
 
   DelegatedEventLoop (Context->CpuId, Context->MpxyChannelId, Context->SmmMessageCmd);
@@ -440,6 +462,14 @@ InitRiscVSse (
            );
     ASSERT (0);
   }
+  SbiCall (
+          SBI_EXT_SSE,
+          SBI_EXT_SSE_HART_UNMASK,
+          0,
+          NULL,
+          NULL,
+          NULL
+          );
 }
 
 /** Returns the HOB data for the matching HOB GUID.
@@ -536,5 +566,6 @@ CModuleEntryPoint (
 
   //  UINTN       SmmMsgLen, SmmRespLen;
   SendMMComplete (PayloadBootInfo->MpxyChannelId, InitMmFoundationSmmArgs);
+  SseEvtComplete();
   ASSERT(0);
 }

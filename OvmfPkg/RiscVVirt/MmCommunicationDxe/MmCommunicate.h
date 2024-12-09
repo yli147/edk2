@@ -24,7 +24,7 @@
 
 // SMM Message ID
 #define RISCV_MSG_ID_SMM_VERSION         0x1
-#define RISCV_MSG_ID_SMM_COMMUNICATE     0x2
+#define RISCV_MSG_ID_SMM_COMMUNICATE     0x4
 #define RISCV_MSG_ID_SMM_EVENT_COMPLETE  0x3
 
 // SMM return error codes
